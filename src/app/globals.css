@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* HarpFlow Custom Theme using Tailwind v4 CSS-first configuration */
+@theme {
+  /* Custom colors for HarpFlow */
+  --color-blow: #3B82F6;
+  --color-draw: #8B5CF6;
+  --color-correct: #22C55E;
+  --color-close: #EAB308;
+  --color-wrong: #EF4444;
+  --color-bleed: #F97316;
+
+  /* Dark theme base colors */
+  --color-background: #0F172A;
+  --color-foreground: #F8FAFC;
+  --color-card: #1E293B;
+  --color-card-foreground: #F8FAFC;
+  --color-primary: #3B82F6;
+  --color-primary-foreground: #0F172A;
+  --color-secondary: #334155;
+  --color-secondary-foreground: #F8FAFC;
+  --color-muted: #334155;
+  --color-muted-foreground: #94A3B8;
+  --color-accent: #334155;
+  --color-accent-foreground: #F8FAFC;
+  --color-destructive: #7F1D1D;
+  --color-destructive-foreground: #F8FAFC;
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #3B82F6;
+
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+}
+
+/* Base styles */
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
