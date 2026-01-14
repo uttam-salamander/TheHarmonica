@@ -78,6 +78,15 @@ export const useAudioStore = create<AudioState>((set, get) => {
             bleedResult,
           });
         },
+        onSilence: () => {
+          // Clear the current note when silence is detected
+          set({
+            currentNote: null,
+            frequency: 0,
+            clarity: 0,
+            bleedResult: null,
+          });
+        },
         onError: (error) => {
           set({ error });
         },

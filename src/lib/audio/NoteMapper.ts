@@ -21,6 +21,7 @@ export interface NoteMapResult {
   note: HarmonicaNote;
   centsOff: number; // Deviation from expected pitch in cents
   isBend: boolean; // True if the note is bent
+  alternateNote?: HarmonicaNote; // If another note matches at same frequency (e.g., 2-draw/3-blow)
 }
 
 /**
@@ -151,33 +152,67 @@ export class NoteMapper {
   }
 
   /**
-   * Map a detected frequency to the closest harmonica note
+   * Map a detected frequency to the closest harmonica note.
+   * @param frequency - Detected frequency in Hz
+   * @param preferDirection - Optional hint to prefer blow or draw when ambiguous (e.g., 2-draw vs 3-blow)
    */
-  mapFrequency(frequency: number): NoteMapResult | null {
+  mapFrequency(frequency: number, preferDirection?: Direction): NoteMapResult | null {
     if (frequency <= 0) return null;
 
-    let closestNote: HarmonicaNote | null = null;
-    let closestCents = Infinity;
+    // Find all notes within threshold
+    const matches: { note: HarmonicaNote; cents: number }[] = [];
 
     for (const note of this.allNotes) {
       const cents = Math.abs(frequencyToCents(frequency, note.frequency));
-      if (cents < closestCents) {
-        closestCents = cents;
-        closestNote = note;
+      if (cents <= 50) {
+        matches.push({ note, cents });
       }
     }
 
-    // Only return a match if within 50 cents (half a semitone)
-    if (!closestNote || closestCents > 50) {
-      return null;
+    if (matches.length === 0) return null;
+
+    // Sort by cents (closest first)
+    matches.sort((a, b) => a.cents - b.cents);
+
+    // If multiple notes match at nearly the same cents (within 5 cents), disambiguate
+    const closestCents = matches[0].cents;
+    const tiedMatches = matches.filter((m) => Math.abs(m.cents - closestCents) < 5);
+
+    let bestMatch = tiedMatches[0];
+    let alternateNote: HarmonicaNote | undefined;
+
+    if (tiedMatches.length > 1) {
+      // Multiple notes at same frequency (e.g., 2-draw G4 and 3-blow G4)
+      // Use preference hint or default to draw for lower holes, blow for upper
+      const drawMatch = tiedMatches.find((m) => m.note.direction === "draw");
+      const blowMatch = tiedMatches.find((m) => m.note.direction === "blow");
+
+      if (preferDirection === "draw" && drawMatch) {
+        bestMatch = drawMatch;
+        alternateNote = blowMatch?.note;
+      } else if (preferDirection === "blow" && blowMatch) {
+        bestMatch = blowMatch;
+        alternateNote = drawMatch?.note;
+      } else {
+        // Default: prefer draw for holes 1-6, blow for holes 7-10
+        const avgHole = tiedMatches.reduce((sum, m) => sum + m.note.hole, 0) / tiedMatches.length;
+        if (avgHole <= 6 && drawMatch) {
+          bestMatch = drawMatch;
+          alternateNote = blowMatch?.note;
+        } else if (blowMatch) {
+          bestMatch = blowMatch;
+          alternateNote = drawMatch?.note;
+        }
+      }
     }
 
-    const actualCents = frequencyToCents(frequency, closestNote.frequency);
+    const actualCents = frequencyToCents(frequency, bestMatch.note.frequency);
 
     return {
-      note: closestNote,
+      note: bestMatch.note,
       centsOff: actualCents,
-      isBend: closestNote.bendSemitones !== 0,
+      isBend: bestMatch.note.bendSemitones !== 0,
+      alternateNote,
     };
   }
 

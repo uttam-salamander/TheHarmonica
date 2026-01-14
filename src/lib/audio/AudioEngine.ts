@@ -5,6 +5,7 @@ export type AudioEngineState = "idle" | "requesting" | "active" | "error";
 export interface AudioEngineCallbacks {
   onStateChange?: (state: AudioEngineState) => void;
   onPitch?: (frequency: number, clarity: number) => void;
+  onSilence?: () => void;
   onError?: (error: Error) => void;
 }
 
@@ -21,15 +22,19 @@ export class AudioEngine {
   private animationFrameId: number | null = null;
   private state: AudioEngineState = "idle";
   private callbacks: AudioEngineCallbacks = {};
+  private lastPitchTime: number = 0;
+  private cachedFrequencyData: Float32Array | null = null;
 
   // Audio settings
   private readonly FFT_SIZE = 2048;
-  private readonly MIN_CLARITY = 0.85; // Minimum clarity threshold for valid pitch
+  private readonly SILENCE_TIMEOUT_MS = 150; // Time before declaring silence
+  private minClarity: number; // Minimum clarity threshold for valid pitch
 
-  constructor(callbacks?: AudioEngineCallbacks) {
+  constructor(callbacks?: AudioEngineCallbacks, options?: { minClarity?: number }) {
     if (callbacks) {
       this.callbacks = callbacks;
     }
+    this.minClarity = options?.minClarity ?? 0.8; // Default 0.8, configurable for beginners
   }
 
   private setState(newState: AudioEngineState) {
@@ -45,7 +50,8 @@ export class AudioEngine {
    * Request microphone permission and start audio processing
    */
   async start(): Promise<void> {
-    if (this.state === "active") return;
+    // Prevent duplicate start calls
+    if (this.state === "active" || this.state === "requesting") return;
 
     this.setState("requesting");
 
@@ -61,6 +67,12 @@ export class AudioEngine {
 
       // Create audio context
       this.audioContext = new AudioContext();
+
+      // Handle browser autoplay policy - resume if suspended
+      if (this.audioContext.state === "suspended") {
+        await this.audioContext.resume();
+      }
+
       const source = this.audioContext.createMediaStreamSource(this.mediaStream);
 
       // Create analyser node
@@ -68,11 +80,13 @@ export class AudioEngine {
       this.analyser.fftSize = this.FFT_SIZE;
       source.connect(this.analyser);
 
-      // Initialize pitch detector
+      // Initialize pitch detector and buffers
       this.inputBuffer = new Float32Array(this.analyser.fftSize);
+      this.cachedFrequencyData = new Float32Array(this.analyser.frequencyBinCount);
       this.detector = PitchDetector.forFloat32Array(this.analyser.fftSize);
 
       this.setState("active");
+      this.lastPitchTime = 0;
 
       // Start the detection loop
       this.detectPitch();
@@ -106,6 +120,8 @@ export class AudioEngine {
     this.analyser = null;
     this.detector = null;
     this.inputBuffer = null;
+    this.cachedFrequencyData = null;
+    this.lastPitchTime = 0;
 
     this.setState("idle");
   }
@@ -118,8 +134,15 @@ export class AudioEngine {
       return;
     }
 
-    // Get time domain data
+    const now = performance.now();
+
+    // Get time domain data for pitch detection
     this.analyser.getFloatTimeDomainData(this.inputBuffer);
+
+    // Cache frequency data for synchronized bleed detection
+    if (this.cachedFrequencyData) {
+      this.analyser.getFloatFrequencyData(this.cachedFrequencyData);
+    }
 
     // Detect pitch
     const [frequency, clarity] = this.detector.findPitch(
@@ -128,8 +151,13 @@ export class AudioEngine {
     );
 
     // Only report pitch if clarity is above threshold
-    if (clarity >= this.MIN_CLARITY && frequency > 0) {
+    if (clarity >= this.minClarity && frequency > 0) {
+      this.lastPitchTime = now;
       this.callbacks.onPitch?.(frequency, clarity);
+    } else if (this.lastPitchTime > 0 && now - this.lastPitchTime > this.SILENCE_TIMEOUT_MS) {
+      // Silence detected - no valid pitch for SILENCE_TIMEOUT_MS
+      this.lastPitchTime = 0;
+      this.callbacks.onSilence?.();
     }
 
     // Continue the loop
@@ -137,13 +165,11 @@ export class AudioEngine {
   };
 
   /**
-   * Get the raw frequency data for spectral analysis (used by BleedDetector)
+   * Get the cached frequency data for spectral analysis (used by BleedDetector).
+   * Returns data captured at the same time as pitch detection for synchronization.
    */
   getFrequencyData(): Float32Array | null {
-    if (!this.analyser) return null;
-    const data = new Float32Array(this.analyser.frequencyBinCount);
-    this.analyser.getFloatFrequencyData(data);
-    return data;
+    return this.cachedFrequencyData;
   }
 
   /**

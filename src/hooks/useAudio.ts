@@ -1,11 +1,16 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useAudioStore } from "@/stores/audioStore";
 
 /**
  * Hook for accessing audio engine state and controls.
  * Provides real-time pitch detection, note mapping, and bleed detection.
+ *
+ * Note: Audio is managed globally via Zustand store. Components should
+ * call stop() explicitly when they want to stop listening. The audio
+ * does NOT automatically stop when components unmount, allowing multiple
+ * components to share the same audio stream.
  */
 export function useAudio() {
   const {
@@ -18,17 +23,6 @@ export function useAudio() {
     start,
     stop,
   } = useAudioStore();
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      // Only stop if component unmounts while active
-      const state = useAudioStore.getState();
-      if (state.engineState === "active") {
-        state.stop();
-      }
-    };
-  }, []);
 
   const toggle = useCallback(async () => {
     if (engineState === "active") {
