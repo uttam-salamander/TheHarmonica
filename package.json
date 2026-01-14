@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "tsc": "tsc",
+    "typecheck": "tsc --noEmit",
+    "verify": "bun run typecheck && bun run lint"
   },
   "dependencies": {
     "next": "16.1.1",
