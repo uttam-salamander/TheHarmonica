@@ -17,13 +17,13 @@ export class AudioEngine {
   private audioContext: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
   private mediaStream: MediaStream | null = null;
-  private detector: PitchDetector<Float32Array> | null = null;
-  private inputBuffer: Float32Array | null = null;
+  private detector: PitchDetector<Float32Array<ArrayBuffer>> | null = null;
+  private inputBuffer: Float32Array<ArrayBuffer> | null = null;
   private animationFrameId: number | null = null;
   private state: AudioEngineState = "idle";
   private callbacks: AudioEngineCallbacks = {};
   private lastPitchTime: number = 0;
-  private cachedFrequencyData: Float32Array | null = null;
+  private cachedFrequencyData: Float32Array<ArrayBuffer> | null = null;
 
   // Audio settings
   private readonly FFT_SIZE = 2048;
@@ -168,7 +168,7 @@ export class AudioEngine {
    * Get the cached frequency data for spectral analysis (used by BleedDetector).
    * Returns data captured at the same time as pitch detection for synchronization.
    */
-  getFrequencyData(): Float32Array | null {
+  getFrequencyData(): Float32Array<ArrayBuffer> | null {
     return this.cachedFrequencyData;
   }
 

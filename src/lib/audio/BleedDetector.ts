@@ -66,7 +66,7 @@ export class BleedDetector {
   /**
    * Find peaks in the frequency spectrum
    */
-  private findPeaks(frequencyData: Float32Array, binSize: number): number[] {
+  private findPeaks(frequencyData: Float32Array<ArrayBuffer>, binSize: number): number[] {
     const peaks: number[] = [];
 
     for (let i = 2; i < frequencyData.length - 2; i++) {
@@ -127,7 +127,7 @@ export class BleedDetector {
   private calculateBleedSeverity(
     secondaryPeaks: number[],
     primaryFrequency: number,
-    frequencyData: Float32Array,
+    frequencyData: Float32Array<ArrayBuffer>,
     binSize: number
   ): number {
     if (secondaryPeaks.length === 0) return 0;
