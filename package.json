@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "tsc": "tsc",
     "typecheck": "tsc --noEmit",
     "verify": "bun run typecheck && bun run lint"
@@ -29,8 +29,7 @@
     "typescript": "5.9.3",
     "tailwindcss": "4.1.18",
     "@tailwindcss/postcss": "4.1.18",
-    "eslint": "9.18.0",
-    "eslint-config-next": "16.1.1",
-    "@eslint/eslintrc": "3.2.0"
+    "eslint": "9.39.2",
+    "eslint-config-next": "16.1.1"
   }
 }

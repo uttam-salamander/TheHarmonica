@@ -6,6 +6,7 @@ import { useState } from "react";
 
 export default function BendingGymPage() {
   const [currentExercise, setCurrentExercise] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used when audio integration is complete
   const [holdTime, setHoldTime] = useState(0);
   const targetHoldTime = 3;
 

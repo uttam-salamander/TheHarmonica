@@ -11,7 +11,7 @@ HarpFlow is a harmonica learning web app that provides real-time visual feedback
 ```bash
 bun dev          # Start dev server with Turbopack
 bun run build    # Production build
-bun run lint     # ESLint
+bun run lint     # ESLint (flat config in eslint.config.mjs)
 bun run typecheck # TypeScript check (tsc --noEmit)
 bun run verify   # Run both typecheck and lint
 ```
