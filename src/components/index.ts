@@ -1,0 +1,1 @@
+export { HarmonicaDiagram } from "./HarmonicaDiagram";
