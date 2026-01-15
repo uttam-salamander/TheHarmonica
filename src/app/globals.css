@@ -448,3 +448,388 @@ body {
   background: var(--color-amber);
   color: var(--color-background);
 }
+
+/* ============ MOBILE-FIRST RESPONSIVE UTILITIES ============ */
+
+/* Safe area padding for notch devices */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Touch-friendly tap targets (minimum 44x44px) */
+.tap-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile bottom navigation */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, var(--color-background) 0%, var(--color-background) 80%, transparent 100%);
+  padding: 0.5rem 1rem calc(env(safe-area-inset-bottom, 0.5rem) + 0.5rem);
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.mobile-nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--color-border) 50%, transparent 100%);
+}
+
+/* Full-screen practice mode */
+.practice-fullscreen {
+  position: fixed;
+  inset: 0;
+  background: var(--color-background);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+}
+
+/* ============ GAME-LIKE UI (Simply Piano/Guitar inspired) ============ */
+
+/* XP/Points burst animation */
+@keyframes points-burst {
+  0% {
+    transform: scale(0) translateY(0);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.3) translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-30px);
+    opacity: 0;
+  }
+}
+
+.points-burst {
+  animation: points-burst 1s var(--ease-spring) forwards;
+  pointer-events: none;
+  position: absolute;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-amber);
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+}
+
+/* Note hit feedback - correct */
+@keyframes note-correct {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 15px rgba(52, 211, 153, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
+}
+
+.note-hit-correct {
+  animation: note-correct 0.4s var(--ease-spring);
+}
+
+/* Note hit feedback - wrong */
+@keyframes note-wrong {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.note-hit-wrong {
+  animation: note-wrong 0.3s ease;
+}
+
+/* Streak fire effect */
+@keyframes fire-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(249, 115, 22, 1)) drop-shadow(0 0 30px rgba(245, 158, 11, 0.6));
+  }
+}
+
+.streak-fire {
+  animation: fire-glow 1.5s ease-in-out infinite;
+}
+
+/* Level up celebration */
+@keyframes level-up {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.9) rotate(-5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.level-up-anim {
+  animation: level-up 0.8s var(--ease-spring) forwards;
+}
+
+/* Combo counter */
+.combo-counter {
+  background: linear-gradient(135deg, var(--color-amber) 0%, #F97316 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  font-size: 2rem;
+  text-shadow: none;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
+}
+
+/* Progress ring (circular progress) */
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.5s var(--ease-spring);
+}
+
+/* Workout card pulse */
+@keyframes workout-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+  }
+}
+
+.workout-card-active {
+  animation: workout-pulse 2s ease-in-out infinite;
+  border-color: var(--color-amber) !important;
+}
+
+/* Timer countdown animation */
+@keyframes timer-tick {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.timer-tick {
+  animation: timer-tick 1s ease-in-out infinite;
+}
+
+.timer-warning {
+  animation: timer-tick 0.5s ease-in-out infinite;
+  color: var(--color-wrong) !important;
+}
+
+/* ============ CATEGORY BADGES ============ */
+
+.badge-blues {
+  background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+  color: white;
+}
+
+.badge-rhythm {
+  background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%);
+  color: white;
+}
+
+.badge-expression {
+  background: linear-gradient(135deg, #059669 0%, #34D399 100%);
+  color: white;
+}
+
+.badge-folk {
+  background: linear-gradient(135deg, #92400E 0%, #F59E0B 100%);
+  color: var(--color-background);
+}
+
+/* ============ IMMERSIVE PRACTICE MODE ============ */
+
+.practice-immersive {
+  background: radial-gradient(ellipse at center, #292524 0%, var(--color-background) 100%);
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+}
+
+/* Large visual feedback for mobile */
+.feedback-indicator {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--ease-spring);
+}
+
+.feedback-indicator.correct {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.3) 0%, transparent 70%);
+  box-shadow: 0 0 60px rgba(52, 211, 153, 0.5);
+}
+
+.feedback-indicator.wrong {
+  background: radial-gradient(circle, rgba(248, 113, 113, 0.3) 0%, transparent 70%);
+  box-shadow: 0 0 60px rgba(248, 113, 113, 0.5);
+}
+
+.feedback-indicator.waiting {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.3);
+}
+
+/* ============ SCROLLING TAB DISPLAY ============ */
+
+.tab-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tab-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-note {
+  flex-shrink: 0;
+  min-width: 60px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  transition: all 0.3s var(--ease-spring);
+}
+
+.tab-note.current {
+  transform: scale(1.15);
+  background: var(--color-amber);
+  color: var(--color-background);
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+}
+
+.tab-note.completed {
+  opacity: 0.5;
+}
+
+.tab-note.upcoming {
+  background: var(--color-secondary);
+  color: var(--color-muted-foreground);
+}
+
+/* ============ MOBILE SWIPE CARDS ============ */
+
+.swipe-card-container {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 1rem 0;
+}
+
+.swipe-card-container::-webkit-scrollbar {
+  display: none;
+}
+
+.swipe-card {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  width: 85vw;
+  max-width: 320px;
+}
+
+@media (min-width: 768px) {
+  .swipe-card {
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* ============ RESPONSIVE TYPOGRAPHY ============ */
+
+.text-responsive-xl {
+  font-size: clamp(1.5rem, 5vw, 3rem);
+}
+
+.text-responsive-2xl {
+  font-size: clamp(2rem, 6vw, 4rem);
+}
+
+.text-responsive-3xl {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+}
+
+/* ============ ACCESSIBILITY ============ */
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-card {
+    background: var(--color-card);
+    border: 2px solid var(--color-foreground);
+  }
+
+  .btn-primary {
+    border: 2px solid var(--color-foreground);
+  }
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+/* ============ LANDSCAPE MOBILE LAYOUT ============ */
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .practice-immersive {
+    padding: 0.5rem;
+  }
+
+  .feedback-indicator {
+    width: 80px;
+    height: 80px;
+  }
+}
