@@ -1,26 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Lock, Star, Flame } from "lucide-react";
+import { ArrowLeft, Lock, Star, Flame, Trophy } from "lucide-react";
+import { getLessonsByBranch, isLessonAvailable } from "@/lib/lessons";
+import { useProgressStore } from "@/stores/progressStore";
+import type { Lesson } from "@/lib/lessons";
 
 export default function LearnPage() {
+  const { level, xp, streak, completedLessons, lessonProgress, getXPToNextLevel, getLevelTitle } =
+    useProgressStore();
+
+  const fundamentals = getLessonsByBranch("fundamentals");
+  const melodies = getLessonsByBranch("melodies");
+  const bending = getLessonsByBranch("bending");
+
+  const xpToNext = getXPToNextLevel();
+  const levelTitle = getLevelTitle();
+
   return (
     <main className="min-h-screen p-8">
       {/* Header */}
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft size={20} />
-            Back
+            Home
           </Link>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Flame className="text-orange-500" size={20} />
-              <span>0 day streak</span>
+              <Flame className={streak > 0 ? "text-orange-500" : ""} size={20} />
+              <span>{streak} day streak</span>
             </div>
-            <div className="px-4 py-2 bg-card rounded-lg border border-border">
-              Level 1 • 0 XP
-            </div>
+            <Link
+              href="/progress"
+              className="px-4 py-2 bg-card rounded-lg border border-border hover:border-primary transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Trophy size={16} className="text-primary" />
+                <span>
+                  Level {level} • {xp} XP
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* XP Progress Bar */}
+        <div className="mb-8 p-4 bg-card rounded-lg border border-border">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">{levelTitle}</span>
+            <span className="text-sm text-muted-foreground">{xpToNext} XP to next level</span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all"
+              style={{
+                width: `${xpToNext > 0 ? ((100 - (xpToNext / (xp + xpToNext)) * 100)) : 100}%`,
+              }}
+            />
           </div>
         </div>
 
@@ -35,36 +75,14 @@ export default function LearnPage() {
               Fundamentals
             </h2>
             <div className="space-y-3">
-              <LessonNode
-                id="welcome"
-                title="Welcome to Harmonica"
-                status="available"
-                stars={0}
-              />
-              <LessonNode
-                id="first-blow"
-                title="Your First Blow Notes"
-                status="locked"
-                stars={0}
-              />
-              <LessonNode
-                id="first-draw"
-                title="Your First Draw Notes"
-                status="locked"
-                stars={0}
-              />
-              <LessonNode
-                id="clean-notes"
-                title="Clean Single Notes"
-                status="locked"
-                stars={0}
-              />
-              <LessonNode
-                id="middle-octave"
-                title="The Middle Octave"
-                status="locked"
-                stars={0}
-              />
+              {fundamentals.map((lesson) => (
+                <LessonNode
+                  key={lesson.id}
+                  lesson={lesson}
+                  progress={lessonProgress[lesson.id]}
+                  isAvailable={isLessonAvailable(lesson.id, completedLessons)}
+                />
+              ))}
             </div>
           </div>
 
@@ -75,24 +93,14 @@ export default function LearnPage() {
               Melodies
             </h2>
             <div className="space-y-3">
-              <LessonNode
-                id="mary-lamb"
-                title="Mary Had a Little Lamb"
-                status="locked"
-                stars={0}
-              />
-              <LessonNode
-                id="twinkle"
-                title="Twinkle Twinkle"
-                status="locked"
-                stars={0}
-              />
-              <LessonNode
-                id="oh-susanna"
-                title="Oh Susanna"
-                status="locked"
-                stars={0}
-              />
+              {melodies.map((lesson) => (
+                <LessonNode
+                  key={lesson.id}
+                  lesson={lesson}
+                  progress={lessonProgress[lesson.id]}
+                  isAvailable={isLessonAvailable(lesson.id, completedLessons)}
+                />
+              ))}
             </div>
           </div>
 
@@ -103,59 +111,96 @@ export default function LearnPage() {
               Bending
             </h2>
             <div className="space-y-3">
-              <LessonNode
-                id="what-is-bending"
-                title="What is Bending?"
-                status="locked"
-                stars={0}
-              />
-              <LessonNode
-                id="first-bend"
-                title="Your First Bend (4-Draw)"
-                status="locked"
-                stars={0}
-              />
-              <LessonNode
-                id="bend-control"
-                title="Bend Control"
-                status="locked"
-                stars={0}
-              />
+              {bending.map((lesson) => (
+                <LessonNode
+                  key={lesson.id}
+                  lesson={lesson}
+                  progress={lessonProgress[lesson.id]}
+                  isAvailable={isLessonAvailable(lesson.id, completedLessons)}
+                />
+              ))}
             </div>
           </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-12 flex gap-4">
+          <Link
+            href="/practice/free"
+            className="flex-1 p-4 bg-card rounded-lg border border-border hover:border-primary transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">🎵</div>
+            <div className="font-medium">Free Play</div>
+            <div className="text-sm text-muted-foreground">Practice without lessons</div>
+          </Link>
+          <Link
+            href="/practice/bending"
+            className="flex-1 p-4 bg-card rounded-lg border border-border hover:border-primary transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">🎯</div>
+            <div className="font-medium">Bending Gym</div>
+            <div className="text-sm text-muted-foreground">Target practice for bends</div>
+          </Link>
+          <Link
+            href="/songs"
+            className="flex-1 p-4 bg-card rounded-lg border border-border hover:border-primary transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">🎶</div>
+            <div className="font-medium">Song Library</div>
+            <div className="text-sm text-muted-foreground">Play your favorite tunes</div>
+          </Link>
         </div>
       </div>
     </main>
   );
 }
 
-function LessonNode({
-  id,
-  title,
-  status,
-  stars,
-}: {
-  id: string;
-  title: string;
-  status: "locked" | "available" | "completed";
-  stars: 0 | 1 | 2 | 3;
-}) {
-  const isLocked = status === "locked";
-  const isAvailable = status === "available";
+interface LessonNodeProps {
+  lesson: Lesson;
+  progress?: {
+    completed: boolean;
+    stars: 0 | 1 | 2 | 3;
+    bestAccuracy: number;
+  };
+  isAvailable: boolean;
+}
+
+function LessonNode({ lesson, progress, isAvailable }: LessonNodeProps) {
+  const isCompleted = progress?.completed ?? false;
+  const stars = progress?.stars ?? 0;
+  const isLocked = !isAvailable && !isCompleted;
+
+  const getStatus = () => {
+    if (isCompleted) return "completed";
+    if (isAvailable) return "available";
+    return "locked";
+  };
+
+  const status = getStatus();
 
   return (
     <Link
-      href={isLocked ? "#" : `/learn/${id}`}
+      href={isLocked ? "#" : `/learn/${lesson.id}`}
       className={`block p-4 rounded-lg border transition-all ${
-        isLocked
+        status === "locked"
           ? "bg-muted/50 border-border cursor-not-allowed opacity-60"
-          : isAvailable
-          ? "bg-card border-primary hover:border-primary/80 hover:shadow-lg hover:shadow-primary/10"
-          : "bg-card border-correct"
+          : status === "available"
+            ? "bg-card border-primary hover:border-primary/80 hover:shadow-lg hover:shadow-primary/10"
+            : "bg-card border-correct"
       }`}
+      onClick={(e) => {
+        if (isLocked) e.preventDefault();
+      }}
     >
       <div className="flex items-center justify-between">
-        <span className={isLocked ? "text-muted-foreground" : ""}>{title}</span>
+        <div>
+          <span className={isLocked ? "text-muted-foreground" : ""}>{lesson.title}</span>
+          {progress?.bestAccuracy !== undefined && progress.bestAccuracy > 0 && (
+            <div className="text-xs text-muted-foreground mt-1">
+              Best: {Math.round(progress.bestAccuracy)}%
+            </div>
+          )}
+        </div>
         {isLocked ? (
           <Lock size={16} className="text-muted-foreground" />
         ) : (
