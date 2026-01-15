@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Bebas_Neue, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const bebasNeue = Bebas_Neue({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-bebas",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${bebasNeue.variable} ${dmSans.variable} font-sans antialiased bg-gradient-animated min-h-screen`}>
+        {/* Noise texture overlay for vintage feel */}
+        <div className="noise-overlay" aria-hidden="true" />
         {children}
       </body>
     </html>
