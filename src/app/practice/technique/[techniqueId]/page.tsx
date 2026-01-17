@@ -8,7 +8,6 @@ import {
   Pause,
   RotateCcw,
   CheckCircle2,
-  Circle,
   Clock,
   Wind,
   Target,
@@ -29,22 +28,30 @@ export default function TechniquePlayerPage() {
 
   const technique = useMemo(() => TECHNIQUES.find((t) => t.id === techniqueId), [techniqueId]);
 
+  // Initialize state based on technique
+  const initialCompletedSteps = useMemo(
+    () => (technique ? new Array(technique.steps.length).fill(false) : []),
+    [technique]
+  );
+  const initialDuration = technique?.duration ?? 0;
+
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<boolean[]>([]);
+  const [completedSteps, setCompletedSteps] = useState<boolean[]>(initialCompletedSteps);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(initialDuration);
   const [isComplete, setIsComplete] = useState(false);
   const [showTips, setShowTips] = useState(false);
 
-  // Initialize
+  // Reset state when technique changes
   useEffect(() => {
-    if (technique) {
-      setCompletedSteps(new Array(technique.steps.length).fill(false));
-      setTimeRemaining(technique.duration);
-    }
-  }, [technique]);
+    setCompletedSteps(initialCompletedSteps);
+    setTimeRemaining(initialDuration);
+    setCurrentStepIndex(0);
+    setIsComplete(false);
+    setIsTimerRunning(false);
+  }, [techniqueId, initialCompletedSteps, initialDuration]);
 
-  // Timer logic
+  // Timer logic - timeRemaining in condition is intentional (we use functional update)
   useEffect(() => {
     if (!isTimerRunning || timeRemaining <= 0) return;
 
@@ -59,6 +66,7 @@ export default function TechniquePlayerPage() {
     }, 1000);
 
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTimerRunning]);
 
   const markStepComplete = useCallback((index: number) => {
@@ -214,7 +222,6 @@ export default function TechniquePlayerPage() {
                 index={index}
                 isActive={index === currentStepIndex}
                 isCompleted={completedSteps[index]}
-                onComplete={() => markStepComplete(index)}
                 onClick={() => setCurrentStepIndex(index)}
               />
             ))}
@@ -269,14 +276,12 @@ function StepCard({
   index,
   isActive,
   isCompleted,
-  onComplete,
   onClick,
 }: {
   step: string;
   index: number;
   isActive: boolean;
   isCompleted: boolean;
-  onComplete: () => void;
   onClick: () => void;
 }) {
   return (

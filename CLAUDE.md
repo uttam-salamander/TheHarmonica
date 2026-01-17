@@ -9,16 +9,20 @@ HarpFlow is a harmonica learning web app that provides real-time visual feedback
 ## Commands
 
 ```bash
-bun dev          # Start dev server with Turbopack
-bun run build    # Production build
-bun run lint     # ESLint (flat config in eslint.config.mjs)
-bun run typecheck # TypeScript check (tsc --noEmit)
-bun run verify   # Run both typecheck and lint
+bun dev              # Start dev server with Turbopack
+bun run build        # Production build
+bun run lint         # ESLint
+bun run typecheck    # TypeScript check (tsc --noEmit)
+bun run verify       # Run typecheck, lint, and tests
+
+bun test             # Run all tests
+bun test --watch     # Watch mode
+bun test <pattern>   # Run specific tests (e.g., bun test NoteMapper)
 ```
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.1 with App Router (page routing in `src/app/`)
+- **Framework**: Next.js 16.1 with App Router
 - **Runtime**: Bun
 - **Styling**: Tailwind CSS v4 with CSS-first `@theme` configuration in `globals.css`
 - **State**: Zustand with localStorage persistence
@@ -27,36 +31,40 @@ bun run verify   # Run both typecheck and lint
 
 ## Architecture
 
-### Routing Structure
+### Audio Pipeline
+
+The real-time pitch detection flows through three layers:
 
 ```
-src/app/
-├── page.tsx              # Landing page
-├── learn/
-│   ├── page.tsx          # Skill tree / lesson selection
-│   └── [lessonId]/page.tsx  # Lesson player with wait-mode
-├── practice/
-│   ├── bending/page.tsx  # Bending gym with pitch targeting
-│   └── free/page.tsx     # Free play sandbox
-├── songs/
-│   ├── page.tsx          # Song library
-│   └── [songId]/page.tsx # Song player
-├── progress/page.tsx     # Stats and achievements
-└── settings/page.tsx     # Harmonica key, calibration
+Microphone → AudioEngine → NoteMapper → BleedDetector
+                ↓              ↓              ↓
+           frequency      HarmonicaNote    BleedResult
+             Hz           hole/direction    isClean
 ```
 
-### Planned Core Components
+- **AudioEngine** (`src/lib/audio/AudioEngine.ts`): Manages Web Audio API, pitch detection via Pitchy
+- **NoteMapper** (`src/lib/audio/NoteMapper.ts`): Converts frequency → harmonica hole (1-10) + direction (blow/draw), handles bends
+- **BleedDetector** (`src/lib/audio/BleedDetector.ts`): Spectral analysis to detect multi-note bleed
 
-- **AudioEngine**: Mic input, real-time pitch detection
-- **NoteMapper**: Frequency → harmonica hole (1-10) + direction (blow/draw)
-- **BleedDetector**: Spectral analysis for multi-note detection
-- **TabPlayer**: Horizontal scrolling tablature with wait mode
+### State Management
+
+Two Zustand stores manage global state:
+
+- **audioStore** (`src/stores/audioStore.ts`): Real-time audio state (engineState, currentNote, frequency, bleedResult). Not persisted.
+- **progressStore** (`src/stores/progressStore.ts`): User progress (level, XP, streak, lessonProgress, achievements). Persisted to localStorage.
+
+Components access audio via the `useAudio()` hook which wraps the audioStore.
+
+### Content Libraries
+
+- **Curriculum** (`src/lib/lessons/curriculum.ts`): Structured lessons with prerequisites, organized by branch (fundamentals/melodies/bending)
+- **Riffs** (`src/lib/riffs/index.ts`): Practice patterns categorized by style (blues/rhythm/expression) and difficulty
+- **Techniques** (`src/lib/techniques/index.ts`): Technique exercises, workouts, and backing tracks
 
 ### Color Semantics
 
-Custom colors defined in `globals.css` using Tailwind v4 `@theme`:
-- `blow` (blue #3B82F6) - blow notes
-- `draw` (purple #8B5CF6) - draw notes
+Custom colors in `globals.css` using Tailwind v4 `@theme`:
+- `blow` (blue) / `draw` (purple) - note direction
 - `correct` (green) / `close` (yellow) / `wrong` (red) - feedback states
 - `bleed` (orange) - multi-hole warning
 
@@ -64,4 +72,5 @@ Custom colors defined in `globals.css` using Tailwind v4 `@theme`:
 
 - Use `@/*` path alias for imports from `src/`
 - Use `cn()` from `@/lib/utils` for conditional class merging
-- TypeScript strict mode is enabled
+- TypeScript strict mode enabled
+- Tests use Bun test runner with happy-dom for DOM mocking

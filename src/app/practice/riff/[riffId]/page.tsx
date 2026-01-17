@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
-  ArrowLeft,
   Play,
   Pause,
   RotateCcw,
@@ -16,7 +15,6 @@ import {
   Music,
   ChevronLeft,
   ChevronRight,
-  Info,
   X,
   Lightbulb,
 } from "lucide-react";
@@ -25,7 +23,6 @@ import { RIFFS, type Riff, type RiffNote } from "@/lib/riffs";
 
 export default function RiffPlayerPage() {
   const params = useParams();
-  const router = useRouter();
   const riffId = params.riffId as string;
 
   const riff = useMemo(() => RIFFS.find((r) => r.id === riffId), [riffId]);

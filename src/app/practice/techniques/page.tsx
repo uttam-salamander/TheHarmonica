@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Wind, Target, Sparkles, Zap, Clock, Star, Filter, ChevronRight } from "lucide-react";
+import { ArrowLeft, Wind, Target, Sparkles, Zap, Clock, Filter, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { TECHNIQUES, type Technique } from "@/lib/techniques";
 

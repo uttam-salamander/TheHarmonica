@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Clock, Dumbbell, Play, Star, Zap, Filter } from "lucide-react";
+import { ArrowLeft, Clock, Dumbbell, Play, Star, Filter } from "lucide-react";
 import { useState } from "react";
 import { WORKOUTS, type Workout } from "@/lib/techniques";
 

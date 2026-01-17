@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Play,
   Pause,
   SkipForward,
@@ -25,37 +24,29 @@ export default function WorkoutPlayerPage() {
 
   const workout = useMemo(() => WORKOUTS.find((w) => w.id === workoutId), [workoutId]);
 
+  // Initialize state based on workout
+  const initialDuration = workout?.exercises[0]?.duration ?? 0;
+  const initialExercisesCompleted = useMemo(
+    () => (workout ? new Array(workout.exercises.length).fill(false) : []),
+    [workout]
+  );
+
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(initialDuration);
   const [isComplete, setIsComplete] = useState(false);
-  const [exercisesCompleted, setExercisesCompleted] = useState<boolean[]>([]);
+  const [exercisesCompleted, setExercisesCompleted] = useState<boolean[]>(initialExercisesCompleted);
 
-  // Initialize workout
+  // Reset state when workout changes
   useEffect(() => {
-    if (workout) {
-      setTimeRemaining(workout.exercises[0]?.duration || 0);
-      setExercisesCompleted(new Array(workout.exercises.length).fill(false));
-    }
-  }, [workout]);
-
-  // Timer logic
-  useEffect(() => {
-    if (!isPlaying || timeRemaining <= 0) return;
-
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          // Exercise complete
-          handleExerciseComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isPlaying, timeRemaining]);
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setTimeRemaining(initialDuration);
+    setExercisesCompleted(initialExercisesCompleted);
+    setCurrentExerciseIndex(0);
+    setIsComplete(false);
+    setIsPlaying(false);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [workoutId, initialDuration, initialExercisesCompleted]);
 
   const handleExerciseComplete = useCallback(() => {
     if (!workout) return;
@@ -76,6 +67,24 @@ export default function WorkoutPlayerPage() {
       setIsComplete(true);
     }
   }, [workout, currentExerciseIndex]);
+
+  // Timer logic
+  useEffect(() => {
+    if (!isPlaying || timeRemaining <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          // Exercise complete
+          handleExerciseComplete();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, handleExerciseComplete, timeRemaining]);
 
   const skipExercise = useCallback(() => {
     if (!workout) return;
