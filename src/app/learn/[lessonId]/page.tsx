@@ -126,9 +126,9 @@ export default function LessonPage() {
       : 0;
 
   return (
-    <main className="min-h-screen flex flex-col bg-background page-enter">
+    <main className="practice-fixed flex flex-col page-enter">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-border glass-card">
+      <header className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border glass-card">
         <Link
           href="/learn"
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
@@ -146,7 +146,7 @@ export default function LessonPage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="practice-content-scroll flex flex-col">
         {/* Tab Player */}
         <div className="p-4 glass-card border-b border-border">
           <TabPlayer
@@ -174,6 +174,7 @@ export default function LessonPage() {
               holeNotes={holeNotes}
               holeBends={holeBends}
               size="lg"
+              mobileRotated
             />
           </div>
 
@@ -207,66 +208,67 @@ export default function LessonPage() {
           )}
         </div>
 
-        {/* Control Bar */}
-        <div className="p-4 border-t border-border glass-card">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-            {/* BPM Control */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">BPM</span>
-              <button
-                onClick={() => setBpm(Math.max(40, bpm - 5))}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary hover:bg-secondary/80 transition-colors font-medium"
-              >
-                -
-              </button>
-              <span className="w-12 text-center font-display text-lg">{bpm}</span>
-              <button
-                onClick={() => setBpm(Math.min(200, bpm + 5))}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary hover:bg-secondary/80 transition-colors font-medium"
-              >
-                +
-              </button>
-            </div>
+      </div>
 
-            {/* Mic Button */}
+      {/* Control Bar - Fixed at bottom */}
+      <div className="flex-shrink-0 p-4 border-t border-border glass-card safe-area-bottom">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+          {/* BPM Control */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground hidden sm:inline">BPM</span>
             <button
-              onClick={toggle}
-              className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all ${
-                isActive
-                  ? "bg-gradient-to-br from-wrong to-red-700 text-white shadow-lg shadow-wrong/30 mic-pulse"
-                  : "bg-gradient-to-br from-amber to-amber-dark text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 hover:scale-105"
+              onClick={() => setBpm(Math.max(40, bpm - 5))}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary hover:bg-secondary/80 transition-colors font-medium"
+            >
+              -
+            </button>
+            <span className="w-10 text-center font-display text-lg">{bpm}</span>
+            <button
+              onClick={() => setBpm(Math.min(200, bpm + 5))}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary hover:bg-secondary/80 transition-colors font-medium"
+            >
+              +
+            </button>
+          </div>
+
+          {/* Mic Button */}
+          <button
+            onClick={toggle}
+            className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl transition-all ${
+              isActive
+                ? "bg-gradient-to-br from-wrong to-red-700 text-white shadow-lg shadow-wrong/30 mic-pulse"
+                : "bg-gradient-to-br from-amber to-amber-dark text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 hover:scale-105"
+            }`}
+          >
+            {isActive ? <MicOff size={24} /> : <Mic size={24} />}
+          </button>
+
+          {/* Status */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium ${
+                isClean
+                  ? "bg-correct/20 text-correct border border-correct/30"
+                  : "bg-bleed/20 text-bleed border border-bleed/30"
               }`}
             >
-              {isActive ? <MicOff size={28} /> : <Mic size={28} />}
-            </button>
-
-            {/* Status */}
-            <div className="flex items-center gap-3">
-              <div
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                  isClean
-                    ? "bg-correct/20 text-correct border border-correct/30"
-                    : "bg-bleed/20 text-bleed border border-bleed/30"
-                }`}
-              >
-                {isClean ? "CLEAN ✓" : "BLEED"}
-              </div>
-              <div className="font-display text-xl w-14 text-right">
-                <span className={runningAccuracy >= 80 ? "text-correct" : runningAccuracy >= 60 ? "text-close" : "text-wrong"}>
-                  {runningAccuracy}%
-                </span>
-              </div>
-              <button
-                onClick={() => setWaitMode(!waitMode)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  waitMode
-                    ? "bg-gradient-to-r from-amber to-amber-dark text-background shadow-md shadow-amber/20"
-                    : "bg-secondary text-muted-foreground"
-                }`}
-              >
-                Wait {waitMode ? "ON" : "OFF"}
-              </button>
+              {isClean ? "✓" : "!"}
             </div>
+            <div className="font-display text-lg sm:text-xl w-10 sm:w-14 text-right">
+              <span className={runningAccuracy >= 80 ? "text-correct" : runningAccuracy >= 60 ? "text-close" : "text-wrong"}>
+                {runningAccuracy}%
+              </span>
+            </div>
+            <button
+              onClick={() => setWaitMode(!waitMode)}
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                waitMode
+                  ? "bg-gradient-to-r from-amber to-amber-dark text-background shadow-md shadow-amber/20"
+                  : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              Wait
+            </button>
           </div>
         </div>
       </div>

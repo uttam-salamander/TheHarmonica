@@ -30,9 +30,9 @@ export default function FreePlayPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   return (
-    <main className={`practice-immersive flex flex-col page-enter ${isFullscreen ? "practice-fullscreen" : ""}`}>
+    <main className={`practice-fixed flex flex-col page-enter ${isFullscreen ? "practice-fullscreen" : ""}`}>
       {/* Header - Minimal in fullscreen */}
-      <header className={`flex items-center justify-between p-4 ${isFullscreen ? "absolute top-0 left-0 right-0 z-10 safe-area-top" : "border-b border-border"}`}>
+      <header className={`flex-shrink-0 flex items-center justify-between p-4 ${isFullscreen ? "absolute top-0 left-0 right-0 z-10 safe-area-top" : "border-b border-border"}`}>
         <Link
           href="/learn"
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group tap-target"
@@ -61,7 +61,7 @@ export default function FreePlayPage() {
       </header>
 
       {/* Main Content - Centered and immersive */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 gap-6 sm:gap-8">
+      <div className="practice-content-scroll flex flex-col items-center justify-center p-4 sm:p-8 gap-4 sm:gap-6">
         {/* Status Badge */}
         {isActive && (
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-correct/10 border border-correct/30">
@@ -102,6 +102,7 @@ export default function FreePlayPage() {
             holeNotes={holeNotes}
             holeBends={holeBends}
             size="lg"
+            mobileRotated
           />
         </div>
 
@@ -168,7 +169,7 @@ export default function FreePlayPage() {
       </div>
 
       {/* Bottom Control Bar */}
-      <div className="p-4 sm:p-6 safe-area-bottom">
+      <div className="flex-shrink-0 p-4 sm:p-6 safe-area-bottom">
         <div className="max-w-md mx-auto flex flex-col items-center gap-4">
           {/* Large Mic Button */}
           <button

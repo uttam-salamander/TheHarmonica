@@ -121,9 +121,9 @@ export default function BendingGymPage() {
   const completedCount = completedExercises.filter(Boolean).length;
 
   return (
-    <main className="practice-immersive min-h-screen flex flex-col page-enter">
+    <main className="practice-fixed flex flex-col page-enter">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 safe-area-top">
+      <header className="flex-shrink-0 flex items-center justify-between p-4 safe-area-top">
         <Link
           href="/learn"
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group tap-target"
@@ -142,7 +142,7 @@ export default function BendingGymPage() {
       </header>
 
       {/* Progress dots */}
-      <div className="flex justify-center gap-2 px-4 pb-2">
+      <div className="flex-shrink-0 flex justify-center gap-2 px-4 pb-2">
         {exercises.map((_, i) => (
           <button
             key={i}
@@ -159,7 +159,7 @@ export default function BendingGymPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col p-4 sm:p-6">
+      <div className="practice-content-scroll flex flex-col p-4 sm:p-6">
         {/* Exercise Info Card */}
         <div className="glass-card rounded-xl p-4 sm:p-6 mb-4 border-accent">
           <div className="flex items-center gap-3 mb-4">
@@ -270,6 +270,7 @@ export default function BendingGymPage() {
               holeNotes={holeNotes}
               holeBends={holeBends}
               size="md"
+              mobileRotated
             />
           </div>
         </div>
@@ -304,7 +305,7 @@ export default function BendingGymPage() {
       </div>
 
       {/* Bottom Controls */}
-      <div className="p-4 safe-area-bottom">
+      <div className="flex-shrink-0 p-4 safe-area-bottom">
         <div className="max-w-md mx-auto flex items-center justify-between gap-4">
           <button
             onClick={() => goToExercise(Math.max(0, currentExercise - 1))}
