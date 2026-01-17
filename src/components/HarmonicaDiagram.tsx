@@ -1,7 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { Direction } from "@/lib/audio";
+import type { Direction, HoleNotes, HoleBends } from "@/lib/audio";
+
+/**
+ * Format note name for display (e.g., "C4" → "C", "C#5" → "C#")
+ * Removes octave number for cleaner diagram display
+ */
+function formatNoteName(noteName: string): string {
+  return noteName.replace(/\d+$/, "");
+}
 
 interface HarmonicaDiagramProps {
   /** Currently active hole (1-10), or null if none */
@@ -22,6 +30,12 @@ interface HarmonicaDiagramProps {
   targetDirection?: Direction | null;
   /** Size variant */
   size?: "sm" | "md" | "lg";
+  /** Show note labels above/below holes */
+  showLabels?: boolean;
+  /** Note names for each hole (from NoteMapper.getHoleNotes()) */
+  holeNotes?: Record<number, HoleNotes>;
+  /** Bend note names for each hole (from NoteMapper.getHoleBends()) */
+  holeBends?: Record<number, HoleBends>;
   /** Additional class names */
   className?: string;
 }
@@ -40,6 +54,9 @@ export function HarmonicaDiagram({
   targetHole = null,
   targetDirection = null,
   size = "md",
+  showLabels = true,
+  holeNotes,
+  holeBends,
   className,
 }: HarmonicaDiagramProps) {
   const holes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -56,8 +73,50 @@ export function HarmonicaDiagram({
     lg: "w-12 text-base",
   };
 
+  const labelSizeClasses = {
+    sm: "text-[10px] w-8",
+    md: "text-xs w-10",
+    lg: "text-sm w-12",
+  };
+
   return (
-    <div className={cn("flex flex-col items-center gap-2", className)}>
+    <div className={cn("flex flex-col items-center gap-1", className)}>
+      {/* Blow notes row (top) */}
+      {showLabels && holeNotes && (
+        <div className="flex items-end justify-center gap-0.5 md:gap-1">
+          {holes.map((hole) => {
+            const notes = holeNotes[hole];
+            const bends = holeBends?.[hole];
+            const isActive = activeHole === hole && activeDirection === "blow";
+            const isTarget = targetHole === hole && targetDirection === "blow";
+
+            return (
+              <div key={hole} className={cn("flex flex-col items-center", labelSizeClasses[size])}>
+                {/* Blow bends (if any) - shown smaller above */}
+                {bends?.blowBends && bends.blowBends.length > 0 && (
+                  <div className="flex flex-col items-center opacity-50 text-[8px] leading-tight">
+                    {bends.blowBends.map((bend, i) => (
+                      <span key={i} className="text-blow">{formatNoteName(bend)}&apos;</span>
+                    ))}
+                  </div>
+                )}
+                {/* Main blow note */}
+                <span
+                  className={cn(
+                    "font-mono transition-all",
+                    isActive && "text-blow font-bold scale-110",
+                    isTarget && "text-blow/70 animate-pulse",
+                    !isActive && !isTarget && "text-blow/40"
+                  )}
+                >
+                  {notes ? formatNoteName(notes.blow) : ""}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Harmonica body */}
       <div
         className={cn(
@@ -79,6 +138,42 @@ export function HarmonicaDiagram({
           />
         ))}
       </div>
+
+      {/* Draw notes row (bottom) */}
+      {showLabels && holeNotes && (
+        <div className="flex items-start justify-center gap-0.5 md:gap-1">
+          {holes.map((hole) => {
+            const notes = holeNotes[hole];
+            const bends = holeBends?.[hole];
+            const isActive = activeHole === hole && activeDirection === "draw";
+            const isTarget = targetHole === hole && targetDirection === "draw";
+
+            return (
+              <div key={hole} className={cn("flex flex-col items-center", labelSizeClasses[size])}>
+                {/* Main draw note */}
+                <span
+                  className={cn(
+                    "font-mono transition-all",
+                    isActive && "text-draw font-bold scale-110",
+                    isTarget && "text-draw/70 animate-pulse",
+                    !isActive && !isTarget && "text-draw/40"
+                  )}
+                >
+                  {notes ? formatNoteName(notes.draw) : ""}
+                </span>
+                {/* Draw bends (if any) - shown smaller below */}
+                {bends?.drawBends && bends.drawBends.length > 0 && (
+                  <div className="flex flex-col items-center opacity-50 text-[8px] leading-tight">
+                    {bends.drawBends.map((bend, i) => (
+                      <span key={i} className="text-draw">{formatNoteName(bend)}&apos;</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Feedback display */}
       {activeHole && (

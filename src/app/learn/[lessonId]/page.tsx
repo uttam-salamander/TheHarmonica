@@ -8,6 +8,7 @@ import { useAudio } from "@/hooks/useAudio";
 import { HarmonicaDiagram, TabPlayer } from "@/components";
 import { getLessonById, calculateStars, calculateXP } from "@/lib/lessons";
 import { useProgressStore } from "@/stores/progressStore";
+import { useAudioStore } from "@/stores/audioStore";
 import type { LessonResult } from "@/lib/lessons";
 
 export default function LessonPage() {
@@ -43,6 +44,11 @@ export default function LessonPage() {
   // Progress store
   const { recordLessonResult, updateStreak, lessonProgress } = useProgressStore();
   const existingProgress = lessonProgress[lessonId];
+
+  // Note labels for diagram
+  const { noteMapper } = useAudioStore();
+  const holeNotes = useMemo(() => noteMapper?.getHoleNotes(), [noteMapper]);
+  const holeBends = useMemo(() => noteMapper?.getHoleBends(), [noteMapper]);
 
   // Handle note hit
   const handleNoteHit = useCallback(
@@ -165,6 +171,8 @@ export default function LessonPage() {
               bleedSeverity={bleedSeverity}
               centsOff={centsOff}
               isBend={isBend}
+              holeNotes={holeNotes}
+              holeBends={holeBends}
               size="lg"
             />
           </div>

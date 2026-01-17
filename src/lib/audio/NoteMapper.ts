@@ -1,3 +1,5 @@
+import type { HarmonicaKey } from "@/stores/settingsStore";
+
 /**
  * Harmonica hole direction
  */
@@ -22,6 +24,22 @@ export interface NoteMapResult {
   centsOff: number; // Deviation from expected pitch in cents
   isBend: boolean; // True if the note is bent
   alternateNote?: HarmonicaNote; // If another note matches at same frequency (e.g., 2-draw/3-blow)
+}
+
+/**
+ * Note labels for diagram display
+ */
+export interface HoleNotes {
+  blow: string;
+  draw: string;
+}
+
+/**
+ * Bend notes for diagram display
+ */
+export interface HoleBends {
+  blowBends: string[];
+  drawBends: string[];
 }
 
 /**
@@ -73,6 +91,54 @@ const BEND_DEPTHS: Record<string, number> = {
 };
 
 /**
+ * Semitone offsets for each harmonica key relative to C
+ */
+const KEY_SEMITONE_OFFSETS: Record<HarmonicaKey, number> = {
+  C: 0,
+  D: 2,
+  E: 4,
+  F: 5,
+  G: 7,
+  A: 9,
+  Bb: 10,
+  Eb: 3,
+  Ab: 8,
+};
+
+/**
+ * Note names for transposition
+ */
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+/**
+ * Transpose a note name by a number of semitones
+ */
+function transposeNoteName(noteName: string, semitones: number): string {
+  // Parse note like "C4", "D#5", etc.
+  const match = noteName.match(/^([A-G]#?)(\d+)$/);
+  if (!match) return noteName;
+
+  const [, note, octaveStr] = match;
+  const octave = parseInt(octaveStr);
+  const noteIndex = NOTE_NAMES.indexOf(note);
+  if (noteIndex === -1) return noteName;
+
+  let newIndex = noteIndex + semitones;
+  let octaveShift = 0;
+
+  while (newIndex < 0) {
+    newIndex += 12;
+    octaveShift--;
+  }
+  while (newIndex >= 12) {
+    newIndex -= 12;
+    octaveShift++;
+  }
+
+  return `${NOTE_NAMES[newIndex]}${octave + octaveShift}`;
+}
+
+/**
  * Convert frequency ratio to cents
  */
 function frequencyToCents(detected: number, reference: number): number {
@@ -81,15 +147,40 @@ function frequencyToCents(detected: number, reference: number): number {
 
 /**
  * NoteMapper maps detected frequencies to harmonica holes and directions.
- * Supports C harmonica with bend detection.
+ * Supports multiple harmonica keys with bend detection.
  */
 export class NoteMapper {
   private layout: typeof C_HARMONICA_LAYOUT;
   private allNotes: HarmonicaNote[];
+  private key: HarmonicaKey;
 
-  constructor() {
-    this.layout = C_HARMONICA_LAYOUT;
+  constructor(key: HarmonicaKey = "C") {
+    this.key = key;
+    this.layout = this.buildTransposedLayout(key);
     this.allNotes = this.buildNoteList();
+  }
+
+  /**
+   * Get the current harmonica key
+   */
+  getKey(): HarmonicaKey {
+    return this.key;
+  }
+
+  /**
+   * Build a transposed layout for the given key
+   */
+  private buildTransposedLayout(key: HarmonicaKey): typeof C_HARMONICA_LAYOUT {
+    const semitoneOffset = KEY_SEMITONE_OFFSETS[key];
+    const transposed: typeof C_HARMONICA_LAYOUT = {};
+
+    for (const [noteKey, data] of Object.entries(C_HARMONICA_LAYOUT)) {
+      const transposedFrequency = data.frequency * Math.pow(2, semitoneOffset / 12);
+      const transposedNoteName = transposeNoteName(data.noteName, semitoneOffset);
+      transposed[noteKey] = { frequency: transposedFrequency, noteName: transposedNoteName };
+    }
+
+    return transposed;
   }
 
   /**
@@ -114,12 +205,13 @@ export class NoteMapper {
       const blowBendDepth = BEND_DEPTHS[blowKey] ?? 0;
       for (let bend = -1; bend >= blowBendDepth; bend--) {
         const bentFreq = blowData.frequency * Math.pow(2, bend / 12);
+        const bentNoteName = transposeNoteName(blowData.noteName, bend);
         notes.push({
           hole,
           direction: "blow",
           frequency: bentFreq,
           bendSemitones: bend,
-          noteName: `${blowData.noteName}${bend === -1 ? "b" : `(${bend})`}`,
+          noteName: bentNoteName,
         });
       }
 
@@ -138,12 +230,13 @@ export class NoteMapper {
       const drawBendDepth = BEND_DEPTHS[drawKey] ?? 0;
       for (let bend = -1; bend >= drawBendDepth; bend--) {
         const bentFreq = drawData.frequency * Math.pow(2, bend / 12);
+        const bentNoteName = transposeNoteName(drawData.noteName, bend);
         notes.push({
           hole,
           direction: "draw",
           frequency: bentFreq,
           bendSemitones: bend,
-          noteName: `${drawData.noteName}${bend === -1 ? "b" : `(${bend})`}`,
+          noteName: bentNoteName,
         });
       }
     }
@@ -246,5 +339,52 @@ export class NoteMapper {
    */
   canBend(hole: number, direction: Direction): boolean {
     return this.getMaxBendDepth(hole, direction) < 0;
+  }
+
+  /**
+   * Get all natural note names for each hole (for diagram display)
+   */
+  getHoleNotes(): Record<number, HoleNotes> {
+    const result: Record<number, HoleNotes> = {};
+    for (let hole = 1; hole <= 10; hole++) {
+      result[hole] = {
+        blow: this.layout[`${hole}-blow`].noteName,
+        draw: this.layout[`${hole}-draw`].noteName,
+      };
+    }
+    return result;
+  }
+
+  /**
+   * Get all available bend note names for each hole (for diagram display)
+   */
+  getHoleBends(): Record<number, HoleBends> {
+    const result: Record<number, HoleBends> = {};
+
+    for (let hole = 1; hole <= 10; hole++) {
+      const blowData = this.layout[`${hole}-blow`];
+      const drawData = this.layout[`${hole}-draw`];
+      const blowDepth = BEND_DEPTHS[`${hole}-blow`] ?? 0;
+      const drawDepth = BEND_DEPTHS[`${hole}-draw`] ?? 0;
+
+      result[hole] = {
+        blowBends: this.generateBendNames(blowData.noteName, blowDepth),
+        drawBends: this.generateBendNames(drawData.noteName, drawDepth),
+      };
+    }
+    return result;
+  }
+
+  /**
+   * Generate bent note names for a given base note and bend depth
+   */
+  private generateBendNames(baseNote: string, bendDepth: number): string[] {
+    if (bendDepth >= 0) return [];
+    const bends: string[] = [];
+    for (let bend = -1; bend >= bendDepth; bend--) {
+      const bentNote = transposeNoteName(baseNote, bend);
+      bends.push(bentNote);
+    }
+    return bends;
   }
 }

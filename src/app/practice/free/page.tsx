@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { ArrowLeft, Mic, MicOff, AlertCircle, Radio, X, Maximize2, Minimize2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAudio } from "@/hooks/useAudio";
 import { HarmonicaDiagram } from "@/components";
+import { useAudioStore } from "@/stores/audioStore";
 
 export default function FreePlayPage() {
   const {
@@ -21,6 +22,10 @@ export default function FreePlayPage() {
     bleedSeverity,
     toggle,
   } = useAudio();
+
+  const { noteMapper } = useAudioStore();
+  const holeNotes = useMemo(() => noteMapper?.getHoleNotes(), [noteMapper]);
+  const holeBends = useMemo(() => noteMapper?.getHoleBends(), [noteMapper]);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -94,6 +99,8 @@ export default function FreePlayPage() {
             bleedSeverity={bleedSeverity}
             centsOff={centsOff}
             isBend={isBend}
+            holeNotes={holeNotes}
+            holeBends={holeBends}
             size="lg"
           />
         </div>

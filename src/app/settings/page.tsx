@@ -2,13 +2,21 @@
 
 import Link from "next/link";
 import { ArrowLeft, Mic, Volume2, Music2, Settings2, Info, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useSettingsStore, type HarmonicaKey } from "@/stores/settingsStore";
 
-const harmonicaKeys = ["C", "A", "G", "D", "E", "F", "Bb", "Eb", "Ab"];
+const harmonicaKeys: HarmonicaKey[] = ["C", "A", "G", "D", "E", "F", "Bb", "Eb", "Ab"];
 
 export default function SettingsPage() {
-  const [selectedKey, setSelectedKey] = useState("C");
-  const [waitModeDefault, setWaitModeDefault] = useState(true);
+  const {
+    harmonicaKey,
+    metronomeSound,
+    countIn,
+    waitModeDefault,
+    setHarmonicaKey,
+    setMetronomeSound,
+    setCountIn,
+    setWaitModeDefault,
+  } = useSettingsStore();
 
   return (
     <main className="min-h-screen p-6 md:p-8 page-enter">
@@ -49,9 +57,9 @@ export default function SettingsPage() {
               {harmonicaKeys.map((key) => (
                 <button
                   key={key}
-                  onClick={() => setSelectedKey(key)}
+                  onClick={() => setHarmonicaKey(key)}
                   className={`w-12 h-12 rounded-xl font-display text-lg transition-all ${
-                    selectedKey === key
+                    harmonicaKey === key
                       ? "bg-gradient-to-br from-amber to-amber-dark text-background shadow-lg shadow-amber/30 scale-105"
                       : "bg-secondary hover:bg-secondary/80 hover:scale-102"
                   }`}
@@ -105,12 +113,14 @@ export default function SettingsPage() {
               <SettingToggle
                 title="Metronome Sound"
                 description="Play click sound on beat"
-                defaultChecked
+                checked={metronomeSound}
+                onChange={setMetronomeSound}
               />
               <SettingToggle
                 title="Count-in"
                 description="3-2-1 countdown before exercises"
-                defaultChecked
+                checked={countIn}
+                onChange={setCountIn}
               />
             </div>
           </section>
@@ -132,6 +142,7 @@ export default function SettingsPage() {
               checked={waitModeDefault}
               onChange={setWaitModeDefault}
             />
+            {/* Default tempo control could be added here */}
           </section>
 
           {/* About */}
@@ -175,18 +186,13 @@ function SettingToggle({
   title,
   description,
   checked,
-  defaultChecked,
   onChange,
 }: {
   title: string;
   description: string;
-  checked?: boolean;
-  defaultChecked?: boolean;
-  onChange?: (checked: boolean) => void;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
 }) {
-  const [isChecked, setIsChecked] = useState(checked ?? defaultChecked ?? false);
-  const actualChecked = checked ?? isChecked;
-
   return (
     <div className="flex items-center justify-between py-2">
       <div>
@@ -195,21 +201,17 @@ function SettingToggle({
       </div>
       <button
         role="switch"
-        aria-checked={actualChecked}
-        onClick={() => {
-          const newValue = !actualChecked;
-          setIsChecked(newValue);
-          onChange?.(newValue);
-        }}
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
         className={`relative w-14 h-7 rounded-full transition-all ${
-          actualChecked
+          checked
             ? "bg-gradient-to-r from-amber to-amber-dark shadow-md shadow-amber/30"
             : "bg-secondary"
         }`}
       >
         <div
           className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-            actualChecked ? "translate-x-8" : "translate-x-1"
+            checked ? "translate-x-8" : "translate-x-1"
           }`}
         />
       </button>

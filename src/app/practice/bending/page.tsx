@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight, Target, Waves, CheckCircle2, Trophy } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAudio } from "@/hooks/useAudio";
 import { HarmonicaDiagram } from "@/components";
+import { useAudioStore } from "@/stores/audioStore";
 
 const exercises: Array<{
   hole: number;
@@ -60,6 +61,10 @@ const exercises: Array<{
 export default function BendingGymPage() {
   const { isActive, toggle, centsOff, hole: detectedHole, direction: detectedDirection } = useAudio();
 
+  const { noteMapper } = useAudioStore();
+  const holeNotes = useMemo(() => noteMapper?.getHoleNotes(), [noteMapper]);
+  const holeBends = useMemo(() => noteMapper?.getHoleBends(), [noteMapper]);
+
   const [currentExercise, setCurrentExercise] = useState(0);
   const [holdTime, setHoldTime] = useState(0);
   const [completedExercises, setCompletedExercises] = useState<boolean[]>(new Array(exercises.length).fill(false));
@@ -75,10 +80,18 @@ export default function BendingGymPage() {
 
   const isInTargetZone = Math.abs(userPitch - currentEx.targetBend) < 20;
 
-  // Hold time tracking
+  // Reset hold time when conditions change
+  const shouldTrackHold = isActive && isInTargetZone;
   useEffect(() => {
-    if (!isActive || !isInTargetZone) {
+    if (!shouldTrackHold) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHoldTime(0);
+    }
+  }, [shouldTrackHold]);
+
+  // Hold time tracking (only runs when shouldTrackHold is true)
+  useEffect(() => {
+    if (!shouldTrackHold) {
       return;
     }
 
@@ -98,7 +111,7 @@ export default function BendingGymPage() {
     }, 100);
 
     return () => clearInterval(timer);
-  }, [isActive, isInTargetZone, currentExercise, completedExercises]);
+  }, [shouldTrackHold, currentExercise, completedExercises]);
 
   const goToExercise = useCallback((index: number) => {
     setCurrentExercise(index);
@@ -254,6 +267,8 @@ export default function BendingGymPage() {
               bleedSeverity={0}
               centsOff={0}
               isBend={true}
+              holeNotes={holeNotes}
+              holeBends={holeBends}
               size="md"
             />
           </div>

@@ -7,6 +7,7 @@ import {
   type NoteMapResult,
   type BleedResult,
 } from "@/lib/audio";
+import { useSettingsStore, type HarmonicaKey } from "./settingsStore";
 
 interface AudioState {
   // Engine state
@@ -27,11 +28,15 @@ interface AudioState {
   // Actions
   start: () => Promise<void>;
   stop: () => void;
+  setHarmonicaKey: (key: HarmonicaKey) => void;
 }
 
 export const useAudioStore = create<AudioState>((set, get) => {
-  // Create instances once
-  const noteMapper = new NoteMapper();
+  // Get initial key from settings store
+  const initialKey = useSettingsStore.getState().harmonicaKey;
+
+  // Create instances with current key
+  const noteMapper = new NoteMapper(initialKey);
   const bleedDetector = new BleedDetector();
 
   return {
@@ -45,6 +50,12 @@ export const useAudioStore = create<AudioState>((set, get) => {
     engine: null,
     noteMapper,
     bleedDetector,
+
+    setHarmonicaKey: (key: HarmonicaKey) => {
+      // Recreate NoteMapper with new key
+      const newNoteMapper = new NoteMapper(key);
+      set({ noteMapper: newNoteMapper });
+    },
 
     start: async () => {
       const { engine: existingEngine } = get();
@@ -116,4 +127,13 @@ export const useAudioStore = create<AudioState>((set, get) => {
       });
     },
   };
+});
+
+// Subscribe to settings changes to keep noteMapper in sync
+let previousKey = useSettingsStore.getState().harmonicaKey;
+useSettingsStore.subscribe((state) => {
+  if (state.harmonicaKey !== previousKey) {
+    previousKey = state.harmonicaKey;
+    useAudioStore.getState().setHarmonicaKey(state.harmonicaKey);
+  }
 });
