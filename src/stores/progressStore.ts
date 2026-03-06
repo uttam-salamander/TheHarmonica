@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { LessonProgress, LessonResult } from "@/lib/lessons";
+import { CURRICULUM } from "@/lib/lessons";
 
 interface ProgressState {
   // User stats
@@ -28,6 +29,9 @@ interface ProgressState {
 
 // XP required for each level
 const LEVEL_XP = [0, 100, 250, 500, 1000, 1750, 2750, 4000, 5500, 7500, 10000];
+const FUNDAMENTAL_LESSON_IDS = CURRICULUM
+  .filter((lesson) => lesson.branch === "fundamentals")
+  .map((lesson) => lesson.id);
 
 function getLevel(xp: number): number {
   for (let i = LEVEL_XP.length - 1; i >= 0; i--) {
@@ -50,8 +54,15 @@ function getLevelName(level: number): string {
   return "Expert";
 }
 
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function getTodayString(): string {
-  return new Date().toISOString().split("T")[0];
+  return formatLocalDate(new Date());
 }
 
 export const useProgressStore = create<ProgressState>()(
@@ -119,6 +130,16 @@ export const useProgressStore = create<ProgressState>()(
           newAchievements.add("first-bend");
         }
 
+        // Fundamentals master achievement
+        if (!state.achievements.has("fundamentals")) {
+          const allFundamentalsComplete = FUNDAMENTAL_LESSON_IDS.every((lessonId) =>
+            newCompleted.has(lessonId)
+          );
+          if (allFundamentalsComplete) {
+            newAchievements.add("fundamentals");
+          }
+        }
+
         set({
           xp: newXP,
           level: newLevel,
@@ -136,7 +157,7 @@ export const useProgressStore = create<ProgressState>()(
         const today = getTodayString();
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayString = yesterday.toISOString().split("T")[0];
+        const yesterdayString = formatLocalDate(yesterday);
 
         if (state.lastPracticeDate === today) {
           // Already practiced today

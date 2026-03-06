@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useAudioStore } from "@/stores/audioStore";
 
 /**
@@ -22,7 +23,18 @@ export function useAudio() {
     bleedResult,
     start,
     stop,
-  } = useAudioStore();
+  } = useAudioStore(
+    useShallow((state) => ({
+      engineState: state.engineState,
+      error: state.error,
+      currentNote: state.currentNote,
+      frequency: state.frequency,
+      clarity: state.clarity,
+      bleedResult: state.bleedResult,
+      start: state.start,
+      stop: state.stop,
+    }))
+  );
 
   const toggle = useCallback(async () => {
     if (engineState === "active") {

@@ -299,7 +299,7 @@ function StepCard({
         <div
           className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
             isCompleted
-              ? "bg-correct text-white"
+              ? "bg-correct text-foreground"
               : isActive
                 ? "bg-amber text-background"
                 : "bg-secondary text-muted-foreground"

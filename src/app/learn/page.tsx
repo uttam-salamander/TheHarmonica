@@ -27,6 +27,7 @@ import { getLessonsByBranch, isLessonAvailable } from "@/lib/lessons";
 import { useProgressStore } from "@/stores/progressStore";
 import { RIFFS } from "@/lib/riffs";
 import { TECHNIQUES, WORKOUTS, BACKING_TRACKS } from "@/lib/techniques";
+import { SONGS } from "@/lib/songs";
 import type { Lesson } from "@/lib/lessons";
 
 export default function LearnPage() {
@@ -168,7 +169,7 @@ export default function LearnPage() {
               title="Song Library"
               description="Play real tunes"
               color="correct"
-              badge="6 songs"
+              badge={`${SONGS.length} songs`}
             />
           </div>
         </section>

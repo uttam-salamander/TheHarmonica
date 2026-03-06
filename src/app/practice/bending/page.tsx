@@ -320,12 +320,12 @@ export default function BendingGymPage() {
             onClick={toggle}
             className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all ${
               isActive
-                ? "bg-gradient-to-br from-wrong to-red-700 text-white shadow-lg shadow-wrong/30 mic-pulse"
-                : "bg-gradient-to-br from-draw to-purple-600 text-white shadow-lg shadow-draw/30 hover:scale-105"
+                ? "bg-gradient-to-br from-wrong to-wrong-dark text-foreground shadow-lg shadow-wrong/30 mic-pulse"
+                : "bg-gradient-to-br from-draw to-draw-dark text-foreground shadow-lg shadow-draw/30 hover:scale-105"
             }`}
           >
             {isActive ? (
-              <div className="w-5 h-5 bg-white rounded-sm" />
+              <div className="w-5 h-5 bg-foreground rounded-sm" />
             ) : (
               <Target size={28} />
             )}
@@ -334,7 +334,7 @@ export default function BendingGymPage() {
           <button
             onClick={() => goToExercise(Math.min(exercises.length - 1, currentExercise + 1))}
             disabled={currentExercise === exercises.length - 1}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-draw to-purple-600 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:shadow-draw/30 font-medium tap-target"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-draw to-draw-dark text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:shadow-draw/30 font-medium tap-target"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight size={20} />

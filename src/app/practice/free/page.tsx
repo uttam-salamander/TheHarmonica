@@ -177,7 +177,7 @@ export default function FreePlayPage() {
             disabled={isRequesting}
             className={`w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center rounded-2xl sm:rounded-3xl transition-all disabled:opacity-50 ${
               isActive
-                ? "bg-gradient-to-br from-wrong to-red-700 text-white shadow-lg shadow-wrong/30 mic-pulse"
+                ? "bg-gradient-to-br from-wrong to-wrong-dark text-foreground shadow-lg shadow-wrong/30 mic-pulse"
                 : "bg-gradient-to-br from-amber to-amber-dark text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 hover:scale-105"
             }`}
           >

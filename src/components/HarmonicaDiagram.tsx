@@ -65,11 +65,11 @@ export function HarmonicaDiagram({
               {/* Left cover plate (Blow side) */}
               <div className="relative flex flex-col items-center justify-between py-3 px-2 rounded-l-2xl bg-gradient-to-r from-amber-dark/80 via-amber/60 to-amber/40 border-l-2 border-y-2 border-amber/30">
                 {/* Decorative screws */}
-                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
                 <div className="flex-1 flex flex-col items-center justify-center gap-1 my-2">
                   <span className="text-[9px] font-bold tracking-widest text-amber-dark/80 uppercase [writing-mode:vertical-lr] rotate-180">Blow</span>
                 </div>
-                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
               </div>
 
               {/* Note labels - Blow (left of holes) */}
@@ -85,7 +85,7 @@ export function HarmonicaDiagram({
                         <span
                           className={cn(
                             "font-display text-sm font-semibold tracking-wide transition-all duration-150",
-                            isActive && "text-blow font-bold scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]",
+                            isActive && "text-blow font-bold scale-110 note-blow",
                             isTarget && "text-blow animate-pulse",
                             !isActive && !isTarget && "text-blow/70"
                           )}
@@ -101,18 +101,9 @@ export function HarmonicaDiagram({
               {/* Center - Comb with holes */}
               <div className="relative flex flex-col items-center py-3 px-1">
                 {/* Wood grain texture overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 opacity-90" />
+                <div className="absolute inset-0 bg-gradient-to-r from-metal-dark via-metal-deep to-metal-dark opacity-90" />
                 <div
-                  className="absolute inset-0 opacity-[0.03]"
-                  style={{
-                    backgroundImage: `repeating-linear-gradient(
-                      90deg,
-                      transparent,
-                      transparent 2px,
-                      rgba(255,255,255,0.1) 2px,
-                      rgba(255,255,255,0.1) 4px
-                    )`
-                  }}
+                  className="absolute inset-0 opacity-[0.03] wood-grain-vertical"
                 />
 
                 {/* Holes */}
@@ -147,7 +138,7 @@ export function HarmonicaDiagram({
                         <span
                           className={cn(
                             "font-display text-sm font-semibold tracking-wide transition-all duration-150",
-                            isActive && "text-draw font-bold scale-110 drop-shadow-[0_0_8px_rgba(167,139,250,0.8)]",
+                            isActive && "text-draw font-bold scale-110 note-draw",
                             isTarget && "text-draw animate-pulse",
                             !isActive && !isTarget && "text-draw/70"
                           )}
@@ -167,11 +158,11 @@ export function HarmonicaDiagram({
 
               {/* Right cover plate (Draw side) */}
               <div className="relative flex flex-col items-center justify-between py-3 px-2 rounded-r-2xl bg-gradient-to-l from-amber-dark/80 via-amber/60 to-amber/40 border-r-2 border-y-2 border-amber/30">
-                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
                 <div className="flex-1 flex flex-col items-center justify-center gap-1 my-2">
                   <span className="text-[9px] font-bold tracking-widest text-amber-dark/80 uppercase [writing-mode:vertical-lr] rotate-180">Draw</span>
                 </div>
-                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+                <div className="w-2 h-2 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
               </div>
             </div>
           </div>
@@ -277,7 +268,7 @@ function HarmonicaHorizontal({
         <div className="relative flex items-end">
           {/* Left end cap */}
           <div className="w-4 h-8 rounded-tl-xl bg-gradient-to-b from-amber-dark/80 via-amber/60 to-amber/40 border-l-2 border-t-2 border-amber/30 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
           </div>
 
           {/* Blow notes row */}
@@ -301,7 +292,7 @@ function HarmonicaHorizontal({
                     <span
                       className={cn(
                         "font-display font-semibold tracking-wide transition-all duration-150",
-                        isActive && "text-blow font-bold scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]",
+                        isActive && "text-blow font-bold scale-110 note-blow",
                         isTarget && "text-blow animate-pulse",
                         !isActive && !isTarget && "text-blow/70"
                       )}
@@ -316,7 +307,7 @@ function HarmonicaHorizontal({
 
           {/* Right end cap */}
           <div className="w-4 h-8 rounded-tr-xl bg-gradient-to-b from-amber-dark/80 via-amber/60 to-amber/40 border-r-2 border-t-2 border-amber/30 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
           </div>
         </div>
 
@@ -328,18 +319,9 @@ function HarmonicaHorizontal({
           {/* Comb with holes */}
           <div className="relative flex items-center px-1 py-2">
             {/* Wood texture background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900" />
+            <div className="absolute inset-0 bg-gradient-to-b from-metal-dark via-metal-deep to-metal-dark" />
             <div
-              className="absolute inset-0 opacity-[0.04]"
-              style={{
-                backgroundImage: `repeating-linear-gradient(
-                  0deg,
-                  transparent,
-                  transparent 2px,
-                  rgba(255,255,255,0.1) 2px,
-                  rgba(255,255,255,0.1) 3px
-                )`
-              }}
+              className="absolute inset-0 opacity-[0.04] wood-grain-horizontal"
             />
 
             <div className="relative flex gap-[2px]">
@@ -368,7 +350,7 @@ function HarmonicaHorizontal({
         <div className="relative flex items-start">
           {/* Left end cap */}
           <div className="w-4 h-8 rounded-bl-xl bg-gradient-to-t from-amber-dark/80 via-amber/60 to-amber/40 border-l-2 border-b-2 border-amber/30 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
           </div>
 
           {/* Draw notes row */}
@@ -385,7 +367,7 @@ function HarmonicaHorizontal({
                     <span
                       className={cn(
                         "font-display font-semibold tracking-wide transition-all duration-150",
-                        isActive && "text-draw font-bold scale-110 drop-shadow-[0_0_8px_rgba(167,139,250,0.8)]",
+                        isActive && "text-draw font-bold scale-110 note-draw",
                         isTarget && "text-draw animate-pulse",
                         !isActive && !isTarget && "text-draw/70"
                       )}
@@ -407,7 +389,7 @@ function HarmonicaHorizontal({
 
           {/* Right end cap */}
           <div className="w-4 h-8 rounded-br-xl bg-gradient-to-t from-amber-dark/80 via-amber/60 to-amber/40 border-r-2 border-b-2 border-amber/30 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-stone-300 to-stone-500 shadow-inner" />
+            <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-metal-light to-metal-mid shadow-inner" />
           </div>
         </div>
       </div>
@@ -448,18 +430,18 @@ function HolePremium({
   const getGlowColor = () => {
     if (isActive) {
       if (!isClean && bleedSeverity > 0.3) {
-        return "shadow-[0_0_20px_rgba(251,146,60,0.6),inset_0_2px_4px_rgba(0,0,0,0.5)]";
+        return "hole-shadow-bleed";
       }
       return activeDirection === "blow"
-        ? "shadow-[0_0_20px_rgba(96,165,250,0.6),inset_0_2px_4px_rgba(0,0,0,0.3)]"
-        : "shadow-[0_0_20px_rgba(167,139,250,0.6),inset_0_2px_4px_rgba(0,0,0,0.3)]";
+        ? "hole-shadow-blow-active"
+        : "hole-shadow-draw-active";
     }
     if (isTarget) {
       return targetDirection === "blow"
-        ? "shadow-[0_0_12px_rgba(96,165,250,0.4),inset_0_2px_4px_rgba(0,0,0,0.5)]"
-        : "shadow-[0_0_12px_rgba(167,139,250,0.4),inset_0_2px_4px_rgba(0,0,0,0.5)]";
+        ? "hole-shadow-blow-target"
+        : "hole-shadow-draw-target";
     }
-    return "shadow-[inset_0_3px_6px_rgba(0,0,0,0.6),inset_0_-1px_2px_rgba(255,255,255,0.05)]";
+    return "hole-shadow-idle";
   };
 
   const getBackgroundClass = () => {
@@ -476,7 +458,7 @@ function HolePremium({
         ? "bg-gradient-to-b from-blow/30 to-blow/20 ring-2 ring-blow/50"
         : "bg-gradient-to-b from-draw/30 to-draw/20 ring-2 ring-draw/50";
     }
-    return "bg-gradient-to-b from-stone-950 to-black";
+    return "bg-gradient-to-b from-metal-darker to-metal-dark";
   };
 
   return (
@@ -491,13 +473,13 @@ function HolePremium({
       )}
     >
       {/* Inner highlight ring */}
-      <div className="absolute inset-[2px] rounded-md border border-white/5" />
+      <div className="absolute inset-[2px] rounded-md border border-foreground/5" />
 
       {/* Hole number */}
       <span
         className={cn(
           "relative font-display font-bold tracking-tight",
-          isActive || isTarget ? "text-white" : "text-stone-600"
+          isActive || isTarget ? "text-foreground" : "text-muted-foreground"
         )}
       >
         {number}
@@ -508,9 +490,9 @@ function HolePremium({
         <div
           className={cn(
             "absolute -inset-1 rounded-xl opacity-30 animate-ping",
-            activeDirection === "blow" ? "bg-blow" : "bg-draw"
+            activeDirection === "blow" ? "bg-blow" : "bg-draw",
+            "anim-ping-slow"
           )}
-          style={{ animationDuration: "1.5s" }}
         />
       )}
     </div>
@@ -536,7 +518,7 @@ function FeedbackDisplay({
   if (!activeHole) return null;
 
   return (
-    <div className="flex items-center gap-4 px-4 py-2 rounded-full bg-stone-900/50 border border-stone-700/50 backdrop-blur-sm">
+    <div className="flex items-center gap-4 px-4 py-2 rounded-full bg-metal-dark/50 border border-metal-deep/50 backdrop-blur-sm">
       {/* Note indicator */}
       <div className="flex items-center gap-1">
         <span

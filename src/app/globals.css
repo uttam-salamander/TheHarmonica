@@ -8,15 +8,38 @@
   --color-correct: #34D399;
   --color-close: #FBBF24;
   --color-wrong: #F87171;
+  --color-wrong-dark: #B91C1C;
   --color-bleed: #FB923C;
 
   /* Warm vintage palette */
   --color-amber: #F59E0B;
   --color-amber-light: #FCD34D;
   --color-amber-dark: #D97706;
+  --color-accent-orange: #F97316;
   --color-gold: #EAB308;
   --color-cream: #FEF3C7;
   --color-warmgray: #78716C;
+  --color-overlay: #000000;
+  --color-draw-dark: #7C3AED;
+  --color-surface-1: #2C2520;
+  --color-surface-2: #2A211D;
+
+  /* Extended category palette */
+  --color-blues-start: #1E3A8A;
+  --color-blues-end: #3B82F6;
+  --color-rhythm-start: #7C3AED;
+  --color-rhythm-end: #A78BFA;
+  --color-expression-start: #059669;
+  --color-expression-end: #34D399;
+  --color-folk-start: #92400E;
+  --color-folk-end: #F59E0B;
+
+  /* Metal tones for premium harmonica UI */
+  --color-metal-light: #D6D3D1;
+  --color-metal-mid: #78716C;
+  --color-metal-deep: #44403C;
+  --color-metal-dark: #1C1917;
+  --color-metal-darker: #0C0A09;
 
   /* Dark theme base - deep warm charcoal */
   --color-background: #1C1917;
@@ -44,9 +67,9 @@
   --radius-xl: 1.5rem;
 
   /* Shadows with warm tint */
-  --shadow-glow: 0 0 40px rgba(245, 158, 11, 0.15);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --shadow-button: 0 4px 14px rgba(245, 158, 11, 0.3);
+  --shadow-glow: 0 0 40px color-mix(in srgb, var(--color-amber) 15%, transparent);
+  --shadow-card: 0 4px 24px color-mix(in srgb, var(--color-overlay) 40%, transparent);
+  --shadow-button: 0 4px 14px color-mix(in srgb, var(--color-amber) 30%, transparent);
 
   /* Animation timing */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -122,11 +145,11 @@ body {
 .glass-card {
   background: linear-gradient(
     135deg,
-    rgba(41, 37, 36, 0.8) 0%,
-    rgba(41, 37, 36, 0.4) 100%
+    color-mix(in srgb, var(--color-card) 80%, transparent) 0%,
+    color-mix(in srgb, var(--color-card) 40%, transparent) 100%
   );
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--color-foreground) 8%, transparent);
   box-shadow: var(--shadow-card);
 }
 
@@ -136,11 +159,72 @@ body {
 }
 
 .glow-blow {
-  box-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--color-blow) 30%, transparent);
 }
 
 .glow-draw {
-  box-shadow: 0 0 30px rgba(167, 139, 250, 0.3);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--color-draw) 30%, transparent);
+}
+
+/* Premium harmonica texture and hole effects */
+.wood-grain-vertical {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    color-mix(in srgb, var(--color-foreground) 10%, transparent) 2px,
+    color-mix(in srgb, var(--color-foreground) 10%, transparent) 4px
+  );
+}
+
+.wood-grain-horizontal {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    color-mix(in srgb, var(--color-foreground) 10%, transparent) 2px,
+    color-mix(in srgb, var(--color-foreground) 10%, transparent) 3px
+  );
+}
+
+.hole-shadow-bleed {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-bleed) 60%, transparent),
+    inset 0 2px 4px color-mix(in srgb, var(--color-overlay) 50%, transparent);
+}
+
+.hole-shadow-blow-active {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-blow) 60%, transparent),
+    inset 0 2px 4px color-mix(in srgb, var(--color-overlay) 30%, transparent);
+}
+
+.hole-shadow-draw-active {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-draw) 60%, transparent),
+    inset 0 2px 4px color-mix(in srgb, var(--color-overlay) 30%, transparent);
+}
+
+.hole-shadow-blow-target {
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--color-blow) 40%, transparent),
+    inset 0 2px 4px color-mix(in srgb, var(--color-overlay) 50%, transparent);
+}
+
+.hole-shadow-draw-target {
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--color-draw) 40%, transparent),
+    inset 0 2px 4px color-mix(in srgb, var(--color-overlay) 50%, transparent);
+}
+
+.hole-shadow-idle {
+  box-shadow:
+    inset 0 3px 6px color-mix(in srgb, var(--color-overlay) 60%, transparent),
+    inset 0 -1px 2px color-mix(in srgb, var(--color-foreground) 5%, transparent);
+}
+
+.anim-ping-slow {
+  animation-duration: 1.5s;
 }
 
 /* Animated gradient background */
@@ -148,9 +232,9 @@ body {
   background: linear-gradient(
     -45deg,
     var(--color-background) 0%,
-    #2C2520 25%,
-    #1C1917 50%,
-    #2A211D 75%,
+    var(--color-surface-1) 25%,
+    var(--color-background) 50%,
+    var(--color-surface-2) 75%,
     var(--color-background) 100%
   );
   background-size: 400% 400%;
@@ -176,9 +260,9 @@ body {
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
-    rgba(245, 158, 11, 0.1) 90deg,
+    color-mix(in srgb, var(--color-amber) 10%, transparent) 90deg,
     transparent 180deg,
-    rgba(245, 158, 11, 0.05) 270deg,
+    color-mix(in srgb, var(--color-amber) 5%, transparent) 270deg,
     transparent 360deg
   );
   animation: spin-slow 20s linear infinite;
@@ -239,7 +323,7 @@ body {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-amber) 40%, transparent);
 }
 
 .btn-primary:hover::before {
@@ -307,25 +391,71 @@ body {
   }
 }
 
+/* Utility enter animations used by tips panels */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-top-2 {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation-duration: 0.25s;
+  animation-fill-mode: both;
+  animation-timing-function: var(--ease-smooth);
+  animation-name: fade-in;
+}
+
+.slide-in-from-top-2 {
+  animation-name: slide-in-top-2;
+}
+
+/* Song preview marquee animation */
+@keyframes tab-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: tab-scroll 12s linear infinite;
+}
+
 /* Harmonica-specific colors with glow */
 .note-blow {
   color: var(--color-blow);
-  text-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--color-blow) 50%, transparent);
 }
 
 .note-draw {
   color: var(--color-draw);
-  text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--color-draw) 50%, transparent);
 }
 
 .note-correct {
   color: var(--color-correct);
-  text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--color-correct) 50%, transparent);
 }
 
 .note-wrong {
   color: var(--color-wrong);
-  text-shadow: 0 0 20px rgba(248, 113, 113, 0.5);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--color-wrong) 50%, transparent);
 }
 
 /* Decorative border with corner accents */
@@ -416,10 +546,10 @@ body {
 
 @keyframes mic-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-amber) 40%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 20px rgba(245, 158, 11, 0);
+    box-shadow: 0 0 0 20px transparent;
   }
 }
 
@@ -430,13 +560,13 @@ body {
 
 .card-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--color-overlay) 30%, transparent);
 }
 
 /* Star rating display */
 .star-filled {
   color: var(--color-gold);
-  text-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--color-gold) 50%, transparent);
 }
 
 .star-empty {
@@ -527,22 +657,22 @@ body {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--color-amber);
-  text-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--color-amber) 80%, transparent);
 }
 
 /* Note hit feedback - correct */
 @keyframes note-correct {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-correct) 60%, transparent);
   }
   50% {
     transform: scale(1.1);
-    box-shadow: 0 0 0 15px rgba(52, 211, 153, 0);
+    box-shadow: 0 0 0 15px transparent;
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+    box-shadow: 0 0 0 0 transparent;
   }
 }
 
@@ -564,10 +694,10 @@ body {
 /* Streak fire effect */
 @keyframes fire-glow {
   0%, 100% {
-    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.4));
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-amber) 80%, transparent)) drop-shadow(0 0 20px color-mix(in srgb, var(--color-amber) 40%, transparent));
   }
   50% {
-    filter: drop-shadow(0 0 15px rgba(249, 115, 22, 1)) drop-shadow(0 0 30px rgba(245, 158, 11, 0.6));
+    filter: drop-shadow(0 0 15px var(--color-accent-orange)) drop-shadow(0 0 30px color-mix(in srgb, var(--color-amber) 60%, transparent));
   }
 }
 
@@ -600,14 +730,14 @@ body {
 
 /* Combo counter */
 .combo-counter {
-  background: linear-gradient(135deg, var(--color-amber) 0%, #F97316 100%);
+  background: linear-gradient(135deg, var(--color-amber) 0%, var(--color-accent-orange) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 800;
   font-size: 2rem;
   text-shadow: none;
-  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--color-amber) 50%, transparent));
 }
 
 /* Progress ring (circular progress) */
@@ -622,10 +752,10 @@ body {
 /* Workout card pulse */
 @keyframes workout-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-amber) 40%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    box-shadow: 0 0 0 10px transparent;
   }
 }
 
@@ -653,36 +783,36 @@ body {
 /* ============ CATEGORY BADGES ============ */
 
 .badge-blues {
-  background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-blues-start) 0%, var(--color-blues-end) 100%);
+  color: var(--color-foreground);
 }
 
 .badge-rhythm {
-  background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-rhythm-start) 0%, var(--color-rhythm-end) 100%);
+  color: var(--color-foreground);
 }
 
 .badge-expression {
-  background: linear-gradient(135deg, #059669 0%, #34D399 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-expression-start) 0%, var(--color-expression-end) 100%);
+  color: var(--color-foreground);
 }
 
 .badge-folk {
-  background: linear-gradient(135deg, #92400E 0%, #F59E0B 100%);
+  background: linear-gradient(135deg, var(--color-folk-start) 0%, var(--color-folk-end) 100%);
   color: var(--color-background);
 }
 
 /* ============ IMMERSIVE PRACTICE MODE ============ */
 
 .practice-immersive {
-  background: radial-gradient(ellipse at center, #292524 0%, var(--color-background) 100%);
+  background: radial-gradient(ellipse at center, var(--color-card) 0%, var(--color-background) 100%);
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height for mobile */
 }
 
 /* Fixed height variant - fits exactly in viewport without scrolling */
 .practice-fixed {
-  background: radial-gradient(ellipse at center, #292524 0%, var(--color-background) 100%);
+  background: radial-gradient(ellipse at center, var(--color-card) 0%, var(--color-background) 100%);
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -723,18 +853,18 @@ body {
 }
 
 .feedback-indicator.correct {
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.3) 0%, transparent 70%);
-  box-shadow: 0 0 60px rgba(52, 211, 153, 0.5);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-correct) 30%, transparent) 0%, transparent 70%);
+  box-shadow: 0 0 60px color-mix(in srgb, var(--color-correct) 50%, transparent);
 }
 
 .feedback-indicator.wrong {
-  background: radial-gradient(circle, rgba(248, 113, 113, 0.3) 0%, transparent 70%);
-  box-shadow: 0 0 60px rgba(248, 113, 113, 0.5);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-wrong) 30%, transparent) 0%, transparent 70%);
+  box-shadow: 0 0 60px color-mix(in srgb, var(--color-wrong) 50%, transparent);
 }
 
 .feedback-indicator.waiting {
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
-  box-shadow: 0 0 40px rgba(245, 158, 11, 0.3);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-amber) 20%, transparent) 0%, transparent 70%);
+  box-shadow: 0 0 40px color-mix(in srgb, var(--color-amber) 30%, transparent);
 }
 
 /* ============ SCROLLING TAB DISPLAY ============ */
@@ -767,7 +897,7 @@ body {
   transform: scale(1.15);
   background: var(--color-amber);
   color: var(--color-background);
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--color-amber) 50%, transparent);
 }
 
 .tab-note.completed {

@@ -4,13 +4,28 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Settings, Play, Pause, RotateCcw } from "lucide-react";
 import { useState } from "react";
+import { getSongById } from "@/lib/songs";
 
 export default function SongPlayerPage() {
   const params = useParams();
   const songId = params.songId as string;
+  const song = getSongById(songId);
   const [isPlaying, setIsPlaying] = useState(false);
   const [waitMode, setWaitMode] = useState(true);
   const [tempo, setTempo] = useState(100); // percentage
+
+  if (!song) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center glass-card p-8 rounded-2xl">
+          <h1 className="font-display text-2xl mb-4">Song not found</h1>
+          <Link href="/songs" className="text-amber hover:text-amber-light transition-colors">
+            Back to song library
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -20,7 +35,7 @@ export default function SongPlayerPage() {
           <ArrowLeft size={20} />
           Back
         </Link>
-        <h1 className="text-lg font-semibold">{formatSongTitle(songId)}</h1>
+        <h1 className="text-lg font-semibold">{song.title}</h1>
         <button className="p-2 hover:bg-muted rounded-lg">
           <Settings size={20} />
         </button>
@@ -32,28 +47,17 @@ export default function SongPlayerPage() {
         <div className="h-40 bg-card border-b border-border flex items-center justify-center overflow-hidden">
           <div className="flex gap-2 animate-scroll">
             {/* Sample tab notes for the song */}
-            {[
-              { hole: 4, dir: "blow" },
-              { hole: 4, dir: "blow" },
-              { hole: 5, dir: "blow" },
-              { hole: 4, dir: "blow" },
-              { hole: 6, dir: "blow" },
-              { hole: 5, dir: "blow" },
-              { hole: 4, dir: "blow" },
-              { hole: 4, dir: "blow" },
-              { hole: 5, dir: "blow" },
-              { hole: 4, dir: "blow" },
-              { hole: 7, dir: "draw" },
-              { hole: 6, dir: "blow" },
-            ].map((note, i) => (
+            {song.previewPattern.map((note, i) => (
               <div
                 key={i}
                 className={`w-12 h-16 flex flex-col items-center justify-center rounded-lg ${
-                  i === 3 ? "ring-2 ring-white" : ""
-                } ${note.dir === "blow" ? "bg-blow" : "bg-draw"}`}
+                  i === Math.min(3, song.previewPattern.length - 1) ? "ring-2 ring-foreground" : ""
+                } ${note.direction === "blow" ? "bg-blow" : "bg-draw"}`}
               >
-                <span className="text-lg font-bold text-white">{note.hole}</span>
-                <span className="text-sm text-white/80">{note.dir === "blow" ? "↑" : "↓"}</span>
+                <span className="text-lg font-bold text-foreground">{note.hole}</span>
+                <span className="text-sm text-foreground/80">
+                  {note.direction === "blow" ? "↑" : "↓"}
+                </span>
               </div>
             ))}
           </div>
@@ -113,7 +117,7 @@ export default function SongPlayerPage() {
 
             {/* Status */}
             <div className="flex items-center gap-4">
-              <div className="text-lg font-mono">0:45 / 1:20</div>
+              <div className="text-lg font-mono">0:45 / {song.duration}</div>
               <button
                 onClick={() => setWaitMode(!waitMode)}
                 className={`px-3 py-1 rounded-lg text-sm ${
@@ -128,16 +132,4 @@ export default function SongPlayerPage() {
       </div>
     </main>
   );
-}
-
-function formatSongTitle(id: string): string {
-  const titles: Record<string, string> = {
-    "mary-lamb": "Mary Had a Little Lamb",
-    "twinkle": "Twinkle Twinkle Little Star",
-    "oh-susanna": "Oh Susanna",
-    "amazing-grace": "Amazing Grace",
-    "red-river": "Red River Valley",
-    "saints": "When the Saints Go Marching In",
-  };
-  return titles[id] || id.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }

@@ -12,10 +12,12 @@ export default function SettingsPage() {
     metronomeSound,
     countIn,
     waitModeDefault,
+    defaultTempo,
     setHarmonicaKey,
     setMetronomeSound,
     setCountIn,
     setWaitModeDefault,
+    setDefaultTempo,
   } = useSettingsStore();
 
   return (
@@ -61,7 +63,7 @@ export default function SettingsPage() {
                   className={`w-12 h-12 rounded-xl font-display text-lg transition-all ${
                     harmonicaKey === key
                       ? "bg-gradient-to-br from-amber to-amber-dark text-background shadow-lg shadow-amber/30 scale-105"
-                      : "bg-secondary hover:bg-secondary/80 hover:scale-102"
+                      : "bg-secondary hover:bg-secondary/80 hover:scale-105"
                   }`}
                 >
                   {key}
@@ -142,7 +144,41 @@ export default function SettingsPage() {
               checked={waitModeDefault}
               onChange={setWaitModeDefault}
             />
-            {/* Default tempo control could be added here */}
+            <div className="mt-4 pt-4 border-t border-border space-y-4">
+              <SettingToggle
+                title="Use Lesson Tempo"
+                description="Use each lesson's recommended BPM"
+                checked={defaultTempo === null}
+                onChange={(enabled) => setDefaultTempo(enabled ? null : 80)}
+              />
+
+              <div className={defaultTempo === null ? "opacity-50 pointer-events-none" : ""}>
+                <label className="text-sm text-muted-foreground block mb-2">Default Tempo Override</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setDefaultTempo((defaultTempo ?? 80) - 5)}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-secondary hover:bg-secondary/80 transition-colors font-medium"
+                    aria-label="Decrease tempo"
+                  >
+                    -
+                  </button>
+                  <span className="w-16 text-center font-display text-xl">
+                    {defaultTempo ?? 80}
+                  </span>
+                  <button
+                    onClick={() => setDefaultTempo((defaultTempo ?? 80) + 5)}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-secondary hover:bg-secondary/80 transition-colors font-medium"
+                    aria-label="Increase tempo"
+                  >
+                    +
+                  </button>
+                  <span className="text-sm text-muted-foreground">BPM</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Used only when lesson tempo is disabled.
+                </p>
+              </div>
+            </div>
           </section>
 
           {/* About */}
@@ -210,7 +246,7 @@ function SettingToggle({
         }`}
       >
         <div
-          className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+          className={`absolute top-1 w-5 h-5 rounded-full bg-foreground shadow-sm transition-transform ${
             checked ? "translate-x-8" : "translate-x-1"
           }`}
         />

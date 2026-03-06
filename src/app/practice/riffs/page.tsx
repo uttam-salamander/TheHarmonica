@@ -65,7 +65,7 @@ export default function RiffsPage() {
                 onClick={() => setCategoryFilter(cat.value)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   categoryFilter === cat.value
-                    ? "bg-blow text-white"
+                    ? "bg-blow text-foreground"
                     : "bg-secondary text-muted-foreground hover:bg-secondary/80"
                 }`}
               >
@@ -85,12 +85,12 @@ export default function RiffsPage() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   difficultyFilter === diff
                     ? diff === 1
-                      ? "bg-correct text-white"
+                      ? "bg-correct text-foreground"
                       : diff === 2
                         ? "bg-amber text-background"
                         : diff === 3
-                          ? "bg-wrong text-white"
-                          : "bg-blow text-white"
+                          ? "bg-wrong text-foreground"
+                          : "bg-blow text-foreground"
                     : "bg-secondary text-muted-foreground hover:bg-secondary/80"
                 }`}
               >
@@ -108,7 +108,7 @@ export default function RiffsPage() {
               }`}
             >
               <div
-                className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-transform ${
                   showBendsOnly ? "left-7" : "left-1"
                 }`}
               />

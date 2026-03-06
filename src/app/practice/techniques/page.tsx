@@ -64,14 +64,14 @@ export default function TechniquesPage() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   categoryFilter === cat.value
                     ? cat.value === "breathing"
-                      ? "bg-blow text-white"
+                      ? "bg-blow text-foreground"
                       : cat.value === "embouchure"
                         ? "bg-amber text-background"
                         : cat.value === "expression"
-                          ? "bg-correct text-white"
+                          ? "bg-correct text-foreground"
                           : cat.value === "rhythm"
-                            ? "bg-draw text-white"
-                            : "bg-muted-foreground text-white"
+                            ? "bg-draw text-foreground"
+                            : "bg-muted-foreground text-foreground"
                     : "bg-secondary text-muted-foreground hover:bg-secondary/80"
                 }`}
               >
@@ -96,12 +96,12 @@ export default function TechniquesPage() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   difficultyFilter === option.value
                     ? option.value === 1
-                      ? "bg-correct text-white"
+                      ? "bg-correct text-foreground"
                       : option.value === 2
                         ? "bg-amber text-background"
                         : option.value === 3
-                          ? "bg-wrong text-white"
-                          : "bg-muted-foreground text-white"
+                          ? "bg-wrong text-foreground"
+                          : "bg-muted-foreground text-foreground"
                     : "bg-secondary text-muted-foreground hover:bg-secondary/80"
                 }`}
               >
@@ -139,10 +139,34 @@ export default function TechniquesPage() {
 
 function TechniqueCard({ technique, index }: { technique: Technique; index: number }) {
   const categoryStyles = {
-    breathing: { icon: <Wind size={24} />, color: "text-blow", bg: "bg-blow/20", hoverBorder: "hover:border-blow/50" },
-    embouchure: { icon: <Target size={24} />, color: "text-amber", bg: "bg-amber/20", hoverBorder: "hover:border-amber/50" },
-    expression: { icon: <Sparkles size={24} />, color: "text-correct", bg: "bg-correct/20", hoverBorder: "hover:border-correct/50" },
-    rhythm: { icon: <Zap size={24} />, color: "text-draw", bg: "bg-draw/20", hoverBorder: "hover:border-draw/50" },
+    breathing: {
+      icon: <Wind size={24} />,
+      color: "text-blow",
+      bg: "bg-blow/20",
+      hoverBorder: "hover:border-blow/50",
+      hoverText: "group-hover:text-blow",
+    },
+    embouchure: {
+      icon: <Target size={24} />,
+      color: "text-amber",
+      bg: "bg-amber/20",
+      hoverBorder: "hover:border-amber/50",
+      hoverText: "group-hover:text-amber",
+    },
+    expression: {
+      icon: <Sparkles size={24} />,
+      color: "text-correct",
+      bg: "bg-correct/20",
+      hoverBorder: "hover:border-correct/50",
+      hoverText: "group-hover:text-correct",
+    },
+    rhythm: {
+      icon: <Zap size={24} />,
+      color: "text-draw",
+      bg: "bg-draw/20",
+      hoverBorder: "hover:border-draw/50",
+      hoverText: "group-hover:text-draw",
+    },
   };
 
   const difficultyStyles = {
@@ -178,7 +202,7 @@ function TechniqueCard({ technique, index }: { technique: Technique; index: numb
           {technique.category}
         </span>
       </div>
-      <h3 className={`font-display text-xl mb-2 group-hover:${style.color} transition-colors`}>
+      <h3 className={`font-display text-xl mb-2 transition-colors ${style.hoverText}`}>
         {technique.name}
       </h3>
       <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{technique.description}</p>

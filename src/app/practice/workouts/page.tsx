@@ -57,12 +57,12 @@ export default function WorkoutsPage() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   difficultyFilter === option.value
                     ? option.value === 1
-                      ? "bg-correct text-white"
+                      ? "bg-correct text-foreground"
                       : option.value === 2
                         ? "bg-amber text-background"
                         : option.value === 3
-                          ? "bg-wrong text-white"
-                          : "bg-blow text-white"
+                          ? "bg-wrong text-foreground"
+                          : "bg-blow text-foreground"
                     : "bg-secondary text-muted-foreground hover:bg-secondary/80"
                 }`}
               >

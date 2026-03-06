@@ -5,6 +5,7 @@
 
 import { describe, expect, test, beforeEach } from "bun:test";
 import type { LessonResult } from "@/lib/lessons";
+import { CURRICULUM } from "@/lib/lessons";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
@@ -187,20 +188,40 @@ describe("progressStore", () => {
         );
         expect(useProgressStore.getState().achievements.has("first-bend")).toBe(true);
       });
+
+      test("unlocks fundamentals achievement when all fundamentals lessons are complete", () => {
+        const fundamentalLessons = CURRICULUM.filter((lesson) => lesson.branch === "fundamentals");
+
+        for (const lesson of fundamentalLessons) {
+          useProgressStore.getState().recordLessonResult(
+            createResult({
+              lessonId: lesson.id,
+              stars: 2,
+              accuracy: 80,
+            })
+          );
+        }
+
+        expect(useProgressStore.getState().achievements.has("fundamentals")).toBe(true);
+      });
     });
   });
 
   describe("updateStreak", () => {
-    const getTodayString = () => new Date().toISOString().split("T")[0];
+    const formatLocalDate = (date: Date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+        date.getDate()
+      ).padStart(2, "0")}`;
+    const getTodayString = () => formatLocalDate(new Date());
     const getYesterdayString = () => {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      return yesterday.toISOString().split("T")[0];
+      return formatLocalDate(yesterday);
     };
     const getTwoDaysAgoString = () => {
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      return twoDaysAgo.toISOString().split("T")[0];
+      return formatLocalDate(twoDaysAgo);
     };
 
     test("sets streak to 1 on first practice", () => {

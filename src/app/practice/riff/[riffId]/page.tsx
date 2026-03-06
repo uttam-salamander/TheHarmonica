@@ -314,7 +314,7 @@ function NoteCard({
       <span className="font-display text-2xl sm:text-3xl">{note.hole}</span>
       <span className="text-xs uppercase opacity-80">{note.direction.slice(0, 1)}</span>
       {hasBend && (
-        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-wrong text-white text-xs flex items-center justify-center font-bold">
+        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-wrong text-foreground text-xs flex items-center justify-center font-bold">
           {Math.abs(note.bend || 0)}
         </div>
       )}

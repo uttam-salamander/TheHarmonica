@@ -9,6 +9,7 @@ import { HarmonicaDiagram, TabPlayer } from "@/components";
 import { getLessonById, calculateStars, calculateXP } from "@/lib/lessons";
 import { useProgressStore } from "@/stores/progressStore";
 import { useAudioStore } from "@/stores/audioStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import type { LessonResult } from "@/lib/lessons";
 
 export default function LessonPage() {
@@ -31,9 +32,12 @@ export default function LessonPage() {
   } = useAudio();
 
   // Lesson state
-  const [waitMode, setWaitMode] = useState(true);
-  const [bpm, setBpm] = useState(lesson?.bpm ?? 80);
-  const [showResults, setShowResults] = useState(false);
+  const { waitModeDefault, defaultTempo } = useSettingsStore();
+  const [waitMode, setWaitMode] = useState(waitModeDefault);
+  const [bpm, setBpm] = useState(defaultTempo ?? lesson?.bpm ?? 80);
+  const [attemptKey, setAttemptKey] = useState(0);
+  const [lessonResult, setLessonResult] = useState<LessonResult | null>(null);
+  const [resultTip, setResultTip] = useState<string | null>(null);
   const [stats, setStats] = useState({
     correctNotes: 0,
     totalNotes: 0,
@@ -52,7 +56,7 @@ export default function LessonPage() {
 
   // Handle note hit
   const handleNoteHit = useCallback(
-    (noteIndex: number, correct: boolean, clean: boolean) => {
+    (_noteIndex: number, correct: boolean, clean: boolean) => {
       setStats((prev) => ({
         ...prev,
         correctNotes: prev.correctNotes + (correct ? 1 : 0),
@@ -68,10 +72,10 @@ export default function LessonPage() {
   const handleComplete = useCallback(() => {
     if (!lesson) return;
 
-    const duration = (Date.now() - stats.startTime) / 1000;
-    const accuracy = (stats.correctNotes / lesson.tablature.length) * 100;
-    const cleanPercent =
-      ((lesson.tablature.length - stats.bleedCount) / lesson.tablature.length) * 100;
+    const resolvedNotes = stats.totalNotes > 0 ? stats.totalNotes : lesson.tablature.length;
+    const duration = stats.startTime > 0 ? (Date.now() - stats.startTime) / 1000 : 0;
+    const accuracy = resolvedNotes > 0 ? (stats.correctNotes / resolvedNotes) * 100 : 0;
+    const cleanPercent = resolvedNotes > 0 ? ((resolvedNotes - stats.bleedCount) / resolvedNotes) * 100 : 0;
     const stars = calculateStars(accuracy);
     const isFirstCompletion = !existingProgress?.completed;
     const xpEarned = calculateXP(stars, isFirstCompletion);
@@ -80,9 +84,9 @@ export default function LessonPage() {
       lessonId,
       accuracy,
       cleanPercent,
-      totalNotes: lesson.tablature.length,
+      totalNotes: resolvedNotes,
       correctNotes: stats.correctNotes,
-      missedNotes: lesson.tablature.length - stats.correctNotes,
+      missedNotes: Math.max(0, resolvedNotes - stats.correctNotes),
       bleedCount: stats.bleedCount,
       duration,
       xpEarned,
@@ -91,7 +95,12 @@ export default function LessonPage() {
 
     recordLessonResult(result);
     updateStreak();
-    setShowResults(true);
+    setResultTip(
+      lesson.tips.length > 0
+        ? lesson.tips[Math.floor(Math.random() * lesson.tips.length)]
+        : null
+    );
+    setLessonResult(result);
   }, [lesson, stats, lessonId, existingProgress, recordLessonResult, updateStreak]);
 
   // Reset lesson
@@ -102,7 +111,9 @@ export default function LessonPage() {
       bleedCount: 0,
       startTime: 0,
     });
-    setShowResults(false);
+    setResultTip(null);
+    setLessonResult(null);
+    setAttemptKey((prev) => prev + 1);
   }, []);
 
   // Loading state
@@ -150,12 +161,15 @@ export default function LessonPage() {
         {/* Tab Player */}
         <div className="p-4 glass-card border-b border-border">
           <TabPlayer
+            key={attemptKey}
             tablature={lesson.tablature}
             bpm={bpm}
             timeSignature={lesson.timeSignature}
             waitMode={waitMode}
             detectedNote={currentNote}
             isListening={isActive}
+            isCurrentToneClean={isClean}
+            resetKey={attemptKey}
             onNoteHit={handleNoteHit}
             onComplete={handleComplete}
           />
@@ -236,7 +250,7 @@ export default function LessonPage() {
             onClick={toggle}
             className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl transition-all ${
               isActive
-                ? "bg-gradient-to-br from-wrong to-red-700 text-white shadow-lg shadow-wrong/30 mic-pulse"
+                ? "bg-gradient-to-br from-wrong to-wrong-dark text-foreground shadow-lg shadow-wrong/30 mic-pulse"
                 : "bg-gradient-to-br from-amber to-amber-dark text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 hover:scale-105"
             }`}
           >
@@ -274,10 +288,11 @@ export default function LessonPage() {
       </div>
 
       {/* Results Modal */}
-      {showResults && (
+      {lessonResult && (
         <ResultsModal
           lesson={lesson}
-          stats={stats}
+          result={lessonResult}
+          tip={resultTip}
           onRetry={resetLesson}
           onNext={() => router.push("/learn")}
         />
@@ -288,32 +303,18 @@ export default function LessonPage() {
 
 interface ResultsModalProps {
   lesson: NonNullable<ReturnType<typeof getLessonById>>;
-  stats: {
-    correctNotes: number;
-    totalNotes: number;
-    bleedCount: number;
-    startTime: number;
-  };
+  result: LessonResult;
+  tip: string | null;
   onRetry: () => void;
   onNext: () => void;
 }
 
-function ResultsModal({ lesson, stats, onRetry, onNext }: ResultsModalProps) {
-  // Use useMemo to calculate values once when modal opens
-  const { accuracy, cleanPercent, duration, stars, xpEarned, tip } = useMemo(() => {
-    const acc = Math.round((stats.correctNotes / lesson.tablature.length) * 100);
-    const clean = Math.round(
-      ((lesson.tablature.length - stats.bleedCount) / lesson.tablature.length) * 100
-    );
-    const dur = Math.round((Date.now() - stats.startTime) / 1000);
-    const st = calculateStars(acc);
-    const xp = calculateXP(st, true);
-    const randomTip = lesson.tips.length > 0
-      ? lesson.tips[Math.floor(Math.random() * lesson.tips.length)]
-      : null;
-    return { accuracy: acc, cleanPercent: clean, duration: dur, stars: st, xpEarned: xp, tip: randomTip };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally computed once when modal opens
-  }, []);
+function ResultsModal({ lesson, result, tip, onRetry, onNext }: ResultsModalProps) {
+  const accuracy = Math.round(result.accuracy);
+  const cleanPercent = Math.round(result.cleanPercent);
+  const duration = Math.round(result.duration);
+  const stars = result.stars;
+  const xpEarned = result.xpEarned;
 
   const getMessage = () => {
     if (stars === 3) return "Perfect!";
@@ -322,7 +323,7 @@ function ResultsModal({ lesson, stats, onRetry, onNext }: ResultsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-overlay/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="glass-card rounded-2xl p-8 max-w-md w-full text-center border-accent relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber/10 rounded-full blur-3xl" />

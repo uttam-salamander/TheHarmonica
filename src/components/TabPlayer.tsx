@@ -18,6 +18,10 @@ interface TabPlayerProps {
   detectedNote: NoteMapResult | null;
   /** Whether audio is active */
   isListening: boolean;
+  /** Whether the currently detected tone is clean (no bleed) */
+  isCurrentToneClean?: boolean;
+  /** External reset trigger from parent */
+  resetKey?: string | number;
   /** Callback when a note is hit (correct/incorrect) */
   onNoteHit?: (noteIndex: number, correct: boolean, clean: boolean) => void;
   /** Callback when lesson is complete */
@@ -34,6 +38,7 @@ interface NoteState {
 type TabAction =
   | { type: "SET_CURRENT"; index: number }
   | { type: "MARK_NOTE"; index: number; correct: boolean; clean: boolean }
+  | { type: "MARK_MISSED"; index: number }
   | { type: "RESET"; length: number };
 
 interface TabState {
@@ -66,6 +71,21 @@ function tabReducer(state: TabState, action: TabAction): TabState {
         isComplete,
       };
     }
+    case "MARK_MISSED": {
+      const newNoteStates = [...state.noteStates];
+      newNoteStates[action.index] = {
+        status: "missed",
+        clean: false,
+      };
+      const nextIndex = action.index + 1;
+      const isComplete = nextIndex >= newNoteStates.length;
+      return {
+        ...state,
+        noteStates: newNoteStates,
+        currentIndex: nextIndex,
+        isComplete,
+      };
+    }
     case "RESET":
       return {
         currentIndex: 0,
@@ -83,13 +103,13 @@ function tabReducer(state: TabState, action: TabAction): TabState {
  */
 export function TabPlayer({
   tablature,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Reserved for future metronome feature
   bpm,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Reserved for future metronome feature
   timeSignature,
   waitMode,
   detectedNote,
   isListening,
+  isCurrentToneClean = true,
+  resetKey,
   onNoteHit,
   onComplete,
   className,
@@ -101,7 +121,7 @@ export function TabPlayer({
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastDetectedRef = useRef<{ hole: number; direction: Direction } | null>(null);
+  const lastDetectedRef = useRef<{ hole: number; direction: Direction; bendSemitones: number } | null>(null);
   const completedRef = useRef(false);
 
   // Check if detected note matches current target
@@ -109,26 +129,25 @@ export function TabPlayer({
     (detected: NoteMapResult | null, target: TabNote): boolean => {
       if (!detected) return false;
 
-      const holeMatch = detected.note.hole === target.hole;
-      const directionMatch = detected.note.direction === target.direction;
+      const expectedBend = target.bend ?? 0;
 
-      // For bends, check if we're within range
-      if (target.bend) {
-        const targetCents = target.bend * 100; // semitones to cents
-        const actualCents = detected.centsOff;
-        const bendMatch = Math.abs(actualCents - targetCents) < 50; // ±50 cents tolerance
+      const candidates = [detected.note, detected.alternateNote].filter(
+        (candidate): candidate is NonNullable<NoteMapResult["alternateNote"]> => Boolean(candidate)
+      );
+
+      return candidates.some((candidate) => {
+        const holeMatch = candidate.hole === target.hole;
+        const directionMatch = candidate.direction === target.direction;
+        const bendMatch = candidate.bendSemitones === expectedBend;
         return holeMatch && directionMatch && bendMatch;
-      }
-
-      // For natural notes, just check hole and direction
-      return holeMatch && directionMatch;
+      });
     },
     []
   );
 
-  // Handle note detection in wait mode
+  // Handle note detection
   useEffect(() => {
-    if (!waitMode || !isListening || state.isComplete) return;
+    if (!isListening || state.isComplete) return;
     if (state.currentIndex >= tablature.length) return;
 
     const currentNote = tablature[state.currentIndex];
@@ -138,12 +157,14 @@ export function TabPlayer({
       const newDetection = {
         hole: detectedNote.note.hole,
         direction: detectedNote.note.direction,
+        bendSemitones: detectedNote.note.bendSemitones,
       };
 
       // Avoid processing the same held note multiple times
       if (
         lastDetectedRef.current?.hole === newDetection.hole &&
-        lastDetectedRef.current?.direction === newDetection.direction
+        lastDetectedRef.current?.direction === newDetection.direction &&
+        lastDetectedRef.current?.bendSemitones === newDetection.bendSemitones
       ) {
         return;
       }
@@ -151,22 +172,54 @@ export function TabPlayer({
       lastDetectedRef.current = newDetection;
 
       const isCorrect = checkNoteMatch(detectedNote, currentNote);
-      const isClean = true; // TODO: integrate with bleed detection
+      const isClean = isCurrentToneClean;
 
       // Update state via reducer
       dispatch({ type: "MARK_NOTE", index: state.currentIndex, correct: isCorrect, clean: isClean });
 
-      // Notify parent
-      onNoteHit?.(state.currentIndex, isCorrect, isClean);
+      // Notify parent only when the note is resolved as correct.
+      // Incorrect attempts are still shown in UI but don't advance lesson scoring.
+      if (isCorrect) {
+        onNoteHit?.(state.currentIndex, true, isClean);
+      }
     }
   }, [
     detectedNote,
     state.currentIndex,
     state.isComplete,
     tablature,
+    isListening,
+    isCurrentToneClean,
+    checkNoteMatch,
+    onNoteHit,
+  ]);
+
+  // Timed progression when wait mode is disabled
+  useEffect(() => {
+    if (waitMode || !isListening || state.isComplete) return;
+    if (state.currentIndex >= tablature.length) return;
+
+    // Quarter-note based duration fallback for non-wait mode
+    const [, beatUnit] = timeSignature;
+    const beatUnitMultiplier = 4 / beatUnit;
+    const noteDurationMs = Math.max(
+      250,
+      (60000 / bpm) * tablature[state.currentIndex].duration * beatUnitMultiplier
+    );
+    const timer = setTimeout(() => {
+      dispatch({ type: "MARK_MISSED", index: state.currentIndex });
+      onNoteHit?.(state.currentIndex, false, false);
+    }, noteDurationMs);
+
+    return () => clearTimeout(timer);
+  }, [
     waitMode,
     isListening,
-    checkNoteMatch,
+    state.isComplete,
+    state.currentIndex,
+    bpm,
+    timeSignature,
+    tablature,
     onNoteHit,
   ]);
 
@@ -184,6 +237,13 @@ export function TabPlayer({
       lastDetectedRef.current = null;
     }
   }, [detectedNote]);
+
+  // Reset state when parent asks for a replay or when tablature length changes
+  useEffect(() => {
+    dispatch({ type: "RESET", length: tablature.length });
+    lastDetectedRef.current = null;
+    completedRef.current = false;
+  }, [resetKey, tablature.length]);
 
   // Set current note on mount and index change
   useEffect(() => {
@@ -208,7 +268,7 @@ export function TabPlayer({
       {/* Tab scroll container */}
       <div
         ref={containerRef}
-        className="relative overflow-x-auto overflow-y-hidden py-4 scrollbar-hide"
+        className="relative tab-scroll-container overflow-x-auto overflow-y-hidden py-4"
       >
         <div className="flex items-center gap-2 min-w-max px-8">
           {tablature.map((note, index) => (
@@ -234,7 +294,9 @@ export function TabPlayer({
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${(state.currentIndex / tablature.length) * 100}%` }}
+          style={{
+            width: `${tablature.length > 0 ? (state.currentIndex / tablature.length) * 100 : 0}%`,
+          }}
         />
       </div>
 
@@ -287,7 +349,7 @@ function TabNoteDisplay({ note, state, isCurrent }: TabNoteDisplayProps) {
 
   const getTextColor = () => {
     if (state.status === "correct" || state.status === "incorrect" || state.status === "current") {
-      return "text-white";
+      return "text-foreground";
     }
     return isBlow ? "text-blow" : "text-draw";
   };
@@ -317,7 +379,7 @@ function TabNoteDisplay({ note, state, isCurrent }: TabNoteDisplayProps) {
 
       {/* Bend indicator */}
       {hasBend && (
-        <span className="absolute -bottom-1 text-xs bg-draw text-white px-1 rounded">
+        <span className="absolute -bottom-1 text-xs bg-draw text-foreground px-1 rounded">
           bend
         </span>
       )}

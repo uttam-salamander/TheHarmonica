@@ -3,25 +3,17 @@
 import Link from "next/link";
 import { ArrowLeft, Search, Star, Play, Clock, Music } from "lucide-react";
 import { useState } from "react";
-
-const songs = [
-  { id: "mary-lamb", title: "Mary Had a Little Lamb", difficulty: 1, duration: "1:20", key: "C", genre: "Folk" },
-  { id: "twinkle", title: "Twinkle Twinkle Little Star", difficulty: 1, duration: "1:45", key: "C", genre: "Folk" },
-  { id: "oh-susanna", title: "Oh Susanna", difficulty: 2, duration: "2:15", key: "C", genre: "Folk" },
-  { id: "amazing-grace", title: "Amazing Grace", difficulty: 2, duration: "3:00", key: "C", genre: "Folk" },
-  { id: "red-river", title: "Red River Valley", difficulty: 2, duration: "2:30", key: "C", genre: "Folk" },
-  { id: "saints", title: "When the Saints Go Marching In", difficulty: 2, duration: "2:00", key: "C", genre: "Blues" },
-];
+import { SONGS, type Song } from "@/lib/songs";
 
 type Difficulty = "all" | 1 | 2 | 3;
-type Genre = "all" | "Folk" | "Blues";
+type Genre = "all" | Song["genre"];
 
 export default function SongsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty>("all");
   const [genreFilter, setGenreFilter] = useState<Genre>("all");
 
-  const filteredSongs = songs.filter((song) => {
+  const filteredSongs = SONGS.filter((song) => {
     const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDifficulty = difficultyFilter === "all" || song.difficulty === difficultyFilter;
     const matchesGenre = genreFilter === "all" || song.genre === genreFilter;
@@ -140,7 +132,7 @@ export default function SongsPage() {
         {/* Song count */}
         {filteredSongs.length > 0 && (
           <div className="text-center mt-8 text-sm text-muted-foreground">
-            Showing {filteredSongs.length} of {songs.length} songs
+            Showing {filteredSongs.length} of {SONGS.length} songs
           </div>
         )}
       </div>
@@ -185,7 +177,7 @@ function SongCard({
   song,
   index,
 }: {
-  song: (typeof songs)[number];
+  song: Song;
   index: number;
 }) {
   const difficultyColors = {
